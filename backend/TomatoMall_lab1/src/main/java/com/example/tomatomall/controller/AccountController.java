@@ -18,8 +18,8 @@ public class AccountController {
     /**
      * 获取用户详情
      */
-    @GetMapping()
-    public Response getUser() {
+    @GetMapping("/{username}")
+    public Response<AccountVO> getUser() {
         return Response.buildSuccess(accountService.getAccount());
     }
 
@@ -27,7 +27,7 @@ public class AccountController {
      * 创建新的用户
      */
     @PostMapping()
-    public Response createUser(@RequestBody AccountVO accountVO) {
+    public Response<Boolean> createUser(@RequestBody AccountVO accountVO) {
         return Response.buildSuccess(accountService.register(accountVO));
     }
 
@@ -35,7 +35,7 @@ public class AccountController {
      * 更新用户信息
      */
     @PutMapping()
-    public Response updateUser(@RequestBody AccountVO accountVO) {
+    public Response<Boolean> updateUser(@RequestBody AccountVO accountVO) {
         return Response.buildSuccess(accountService.updateAccount(accountVO));
     }
 
@@ -43,7 +43,7 @@ public class AccountController {
      * 登录
      */
     @PostMapping("/login")
-    public Response login(@RequestParam("phone") String phone, @RequestParam("password") String password) {
+    public Response<Boolean> login(@RequestParam("phone") String phone, @RequestParam("password") String password) {
         return Response.buildSuccess(accountService.login(phone, password));
     }
 }
