@@ -3,6 +3,7 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
+<<<<<<< HEAD
   ],
   "compilerOptions": {
     // ...其他配置
@@ -17,5 +18,7 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue"
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
   ]
 }

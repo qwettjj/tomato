@@ -2,8 +2,11 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "element-plus": "^2.9.7"
+<<<<<<< HEAD
   },
   "devDependencies": {
     "@types/vue": "^2.0.0"
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
   }
 }

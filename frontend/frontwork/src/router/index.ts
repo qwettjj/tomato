@@ -60,6 +60,7 @@ const router = createRouter({
         },
         {
             path: '/home',
+<<<<<<< HEAD
             redirect: '/removeproduct',
             component: () => import('../views/Home.vue'),
             children: [
@@ -74,6 +75,8 @@ const router = createRouter({
         },
         {
             path: '/home',
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
             redirect: '/createproduct',
             component: () => import('../views/Home.vue'),
             children: [

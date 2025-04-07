@@ -1,7 +1,16 @@
+<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/TomatoMall_lab1/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/TomatoMall_lab1/src/main/resources" charset="UTF-8" />
   </component>
+=======
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/TomatoMall_lab1/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/TomatoMall_lab1/src/main/resources" charset="UTF-8" />
+  </component>
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 </project>

@@ -1,14 +1,21 @@
 <template>
   <div class="product-creation-container">
     <div class="product-creation">
+<<<<<<< HEAD
       <h1>{{ currentStep === 1 ? '创建商品' : '添加商品规格' }}</h1>
+=======
+      <h1>创建商品</h1>
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
       <el-form
           :model="form"
           :rules="rules"
           ref="productForm"
           label-width="120px"
           @submit.prevent="submitForm"
+<<<<<<< HEAD
           v-if="currentStep === 1"
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
       >
         <!-- 商品名称 -->
         <el-form-item label="商品名称" prop="title">
@@ -32,6 +39,7 @@
           ></el-input-number>
         </el-form-item>
 
+<<<<<<< HEAD
         <!-- 商品数量 -->
         <el-form-item label="商品数量" prop="amount">
           <el-input-number
@@ -43,6 +51,8 @@
           ></el-input-number>
         </el-form-item>
 
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
         <!-- 商品评分 -->
         <el-form-item label="初始评分" prop="rate">
           <el-rate
@@ -119,6 +129,7 @@
         <el-form-item>
           <el-button
               type="primary"
+<<<<<<< HEAD
               @click="nextStep"
               :disabled="!formValid"
           >下一步</el-button>
@@ -172,6 +183,14 @@
           </el-form-item>
         </el-form>
       </div>
+=======
+              native-type="submit"
+              :disabled="!formValid"
+          >创建商品</el-button>
+          <el-button @click="resetForm">重置</el-button>
+        </el-form-item>
+      </el-form>
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
     </div>
   </div>
 </template>
@@ -179,10 +198,14 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+<<<<<<< HEAD
 import { Plus, Delete } from '@element-plus/icons-vue'
 
 // 当前步骤
 const currentStep = ref(1)
+=======
+import { Plus } from '@element-plus/icons-vue'
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 
 // 静态标签数据
 const popularTags = [
@@ -194,7 +217,10 @@ const popularTags = [
 const form = ref({
   title: '',
   price: null,
+<<<<<<< HEAD
   amount: 1,
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
   rate: null,
   description: '',
   detail: '',
@@ -202,6 +228,7 @@ const form = ref({
   tags: []
 })
 
+<<<<<<< HEAD
 // 规格表单数据
 const specificationForm = ref({
   specs: [
@@ -209,12 +236,17 @@ const specificationForm = ref({
   ]
 })
 
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 // 计算表单是否有效
 const formValid = computed(() => {
   return (
       form.value.title &&
       form.value.price !== null &&
+<<<<<<< HEAD
       form.value.amount !== null &&
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
       form.value.rate !== null &&
       form.value.cover
   )
@@ -230,10 +262,13 @@ const rules = {
     { required: true, message: '请输入商品价格', trigger: 'blur' },
     { type: 'number', min: 0, message: '价格不能小于0', trigger: 'blur' }
   ],
+<<<<<<< HEAD
   amount: [
     { required: true, message: '请输入商品数量', trigger: 'blur' },
     { type: 'number', min: 1, message: '数量不能小于1', trigger: 'blur' }
   ],
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
   rate: [
     { required: true, message: '请设置商品评分', trigger: 'change' },
     { type: 'number', min: 0, max: 10, message: '评分必须在0-10之间', trigger: 'blur' }
@@ -249,6 +284,7 @@ const rules = {
   ]
 }
 
+<<<<<<< HEAD
 // 规格验证规则
 const specRules = {
   item: [
@@ -261,6 +297,8 @@ const specRules = {
   ]
 }
 
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 // 图片上传处理
 const handleImageChange = (file) => {
   form.value.cover = file.raw
@@ -272,6 +310,7 @@ const handleImageRemove = () => {
   form.value.cover = null
 }
 
+<<<<<<< HEAD
 // 添加规格
 const addSpec = () => {
   specificationForm.value.specs.push({ item: '', value: '' })
@@ -286,10 +325,15 @@ const removeSpec = (index) => {
 
 // 下一步
 const nextStep = () => {
+=======
+// 提交表单
+const submitForm = () => {
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
   if (!formValid.value) {
     ElMessage.warning('请完成所有必填项')
     return
   }
+<<<<<<< HEAD
   currentStep.value = 2
 }
 
@@ -309,16 +353,28 @@ const submitForm = () => {
     value: spec.value
   }))
 
+=======
+
+  // 格式化价格为两位小数
+  const formattedPrice = parseFloat(form.value.price).toFixed(2)
+
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
   // 这里模拟API调用
   setTimeout(() => {
     ElMessage.success('商品创建成功！')
     console.log('创建的商品数据：', {
       ...form.value,
+<<<<<<< HEAD
       price: formattedPrice,
       specifications
     })
     resetForm()
     currentStep.value = 1
+=======
+      price: formattedPrice
+    })
+    resetForm()
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
   }, 1000)
 }
 
@@ -327,18 +383,24 @@ const resetForm = () => {
   form.value = {
     title: '',
     price: null,
+<<<<<<< HEAD
     amount: 1,
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
     rate: null,
     description: '',
     detail: '',
     cover: null,
     tags: []
   }
+<<<<<<< HEAD
   specificationForm.value = {
     specs: [
       { item: '', value: '' }
     ]
   }
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 }
 </script>
 
@@ -384,6 +446,7 @@ h1 {
 .el-button[disabled] {
   cursor: not-allowed;
 }
+<<<<<<< HEAD
 
 .spec-item {
   margin-bottom: 20px;
@@ -391,4 +454,6 @@ h1 {
   background-color: #f5f7fa;
   border-radius: 4px;
 }
+=======
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 </style>

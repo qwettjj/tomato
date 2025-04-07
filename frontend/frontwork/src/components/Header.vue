@@ -32,7 +32,11 @@ function logout() {
     <el-row :gutter="10">
 
       <el-col :span="3" class="header-icon">
+<<<<<<< HEAD
         <router-link to="/allproduct" v-slot="{navigate}" class="no-link">
+=======
+        <router-link to="/dashboard" v-slot="{navigate}" class="no-link">
+>>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
           <h1 @click="navigate" class="header-text"> 吃饱饱在线购物</h1>
         </router-link>
       </el-col>
