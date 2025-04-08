@@ -7,19 +7,12 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const name = ref(sessionStorage.getItem('name') || '')
-<<<<<<< HEAD
 const role = ref(sessionStorage.getItem('role') || '管理员')
-=======
-const role = ref(sessionStorage.getItem('role') || '管理员') // 默认为管理员用于演示
->>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 const telephone = ref(sessionStorage.getItem('telephone') || '')
 const email = ref(sessionStorage.getItem('email') || '')
 const location = ref(sessionStorage.getItem('location') || '')
 const avatarUrl = ref(sessionStorage.getItem('avatarUrl') || '')
-<<<<<<< HEAD
 const productId = ref('')
-=======
->>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 
 const isEditing = ref(false)
 const editForm = ref({
@@ -75,7 +68,6 @@ const cancelEdit = () => {
   isEditing.value = false
 }
 
-<<<<<<< HEAD
 const goToCreateProduct = () => {
   router.push('/createproduct')
 }
@@ -87,11 +79,6 @@ const goToModifyProduct = () => {
   }
   router.push(`/removeproduct/${productId.value}`)
 }
-=======
-const goToCreateStore = () => {
-  router.push('/createproduct')
-}
->>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 </script>
 
 <template>
@@ -119,7 +106,6 @@ const goToCreateStore = () => {
           <el-descriptions-item label="位置">{{ location }}</el-descriptions-item>
         </el-descriptions>
 
-<<<<<<< HEAD
         <div v-if="role === '管理员'" class="admin-actions">
           <div class="product-id-input">
             <el-input
@@ -140,14 +126,6 @@ const goToCreateStore = () => {
               type="warning"
               @click="goToCreateProduct"
               class="admin-button"
-=======
-        <!-- 管理员专属按钮 -->
-        <div v-if="role === '管理员'" class="admin-actions">
-          <el-button
-              type="warning"
-              @click="goToCreateStore"
-              style="margin-top: 20px; width: 100%;"
->>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
           >
             创建商品
           </el-button>
@@ -155,10 +133,6 @@ const goToCreateStore = () => {
       </el-card>
 
       <el-card class="edit-card">
-<<<<<<< HEAD
-=======
-        <!-- 原有编辑卡片内容保持不变 -->
->>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
         <template #header>
           <div class="card-header">
             <span>个人信息管理</span>
@@ -226,14 +200,8 @@ const goToCreateStore = () => {
 </template>
 
 <style scoped>
-<<<<<<< HEAD
 .profile-container {
   padding: 10px;
-=======
-/* 原有样式保持不变 */
-.profile-container {
-  padding:10px;
->>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
   display: flex;
   flex-direction: row;
   gap: 5px;
@@ -309,7 +277,6 @@ const goToCreateStore = () => {
   padding: 20px 0;
 }
 
-<<<<<<< HEAD
 .admin-actions {
   margin-top: 20px;
   display: flex;
@@ -329,11 +296,6 @@ const goToCreateStore = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-=======
-/* 新增管理员按钮样式 */
-.admin-actions {
-  margin-top: 20px;
->>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
 }
 
 @media (max-width: 992px) {

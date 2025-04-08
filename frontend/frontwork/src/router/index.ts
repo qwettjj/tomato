@@ -32,6 +32,19 @@ const router = createRouter({
         },
         {
             path: '/home',
+            redirect: '/car',
+            component: () => import('../views/Home.vue'),
+            children: [
+                {
+                    path: 'car',
+                    name: 'Car',
+                    component: () => import('../views/users/Car.vue'),
+                    meta: {title: '购物车'}
+                },
+            ]
+        },
+        {
+            path: '/home',
             redirect: '/allproduct',
             component: () => import('../views/Home.vue'),
             children: [
@@ -60,7 +73,6 @@ const router = createRouter({
         },
         {
             path: '/home',
-<<<<<<< HEAD
             redirect: '/removeproduct',
             component: () => import('../views/Home.vue'),
             children: [
@@ -75,8 +87,6 @@ const router = createRouter({
         },
         {
             path: '/home',
-=======
->>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
             redirect: '/createproduct',
             component: () => import('../views/Home.vue'),
             children: [

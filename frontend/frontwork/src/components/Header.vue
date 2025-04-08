@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {router} from '../router'
 import {parseRole} from "../utils"
-import {User, SwitchButton} from "@element-plus/icons-vue"   //图标
+import {User, SwitchButton, ShoppingCart} from "@element-plus/icons-vue"   // 添加了ShoppingCart图标
 import { ElMessageBox } from 'element-plus'
 const role = sessionStorage.getItem('role')    //登录的时候插入的
 
@@ -32,11 +32,7 @@ function logout() {
     <el-row :gutter="10">
 
       <el-col :span="3" class="header-icon">
-<<<<<<< HEAD
-        <router-link to="/allproduct" v-slot="{navigate}" class="no-link">
-=======
         <router-link to="/dashboard" v-slot="{navigate}" class="no-link">
->>>>>>> 431dbecd26ca9ceb77461c91897a01de963014ae
           <h1 @click="navigate" class="header-text"> 吃饱饱在线购物</h1>
         </router-link>
       </el-col>
@@ -45,16 +41,21 @@ function logout() {
         <el-tag class="role-tag" size="large">{{ parseRole(role) }}管理员版</el-tag>
       </el-col>
 
-      <el-col :span="14">
+      <el-col :span="12">
       </el-col>
 
+      <!-- 添加购物车链接 -->
+      <el-col :span="2" class="header-icon">
+        <router-link to="/home/car" v-slot="{ navigate }" class="header-link">
+          <span @click="navigate" class="header-text">购物车</span>
+        </router-link>
+      </el-col>
 
       <el-col :span="2" class="header-icon">
         <router-link to="/allproduct" v-slot="{ navigate }" class="header-link">
           <span @click="navigate" class="header-text">商品主页</span>
         </router-link>
       </el-col>
-
 
       <el-col :span="1" class="header-icon">
         <router-link to="/home/dashboard" v-slot="{navigate}">
