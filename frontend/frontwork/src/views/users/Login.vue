@@ -28,6 +28,9 @@ const handleLogin = async () => {
     const response = await userLogin({
       phone: phone.value,
       password: password.value
+    }).then(res => {
+      console.log(res);
+      console.log("hello");
     });
 
     // 存储返回数据（根据实际接口返回结构调整）
@@ -46,7 +49,8 @@ const handleLogin = async () => {
       router.push({ name: 'AllProduct' });
     }
 
-  } catch (error) {
+  }
+  catch (error) {
     ElMessage.error(error.response?.data?.message || '登录失败');
     password.value = '';
   } finally {

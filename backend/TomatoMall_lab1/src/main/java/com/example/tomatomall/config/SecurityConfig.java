@@ -22,7 +22,8 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/accounts/register").permitAll()
+                .antMatchers("/api/accounts/create").permitAll()
+                .antMatchers("/api/images").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()

@@ -22,7 +22,6 @@ const registerForm = ref({
 
 // 预览图片URL
 const previewUrl = ref('')
-const avatarFile = ref<File | null>(null)
 
 // 验证规则
 const phoneRegex = /^1[3-9]\d{9}$/
@@ -72,7 +71,6 @@ const beforeUpload: UploadProps['beforeUpload'] = (file) => {
   }
 
   previewUrl.value = URL.createObjectURL(file)
-  avatarFile.value = file
   return true
 }
 
@@ -87,14 +85,6 @@ const handleRegister = async () => {
   })
 
   try {
-    // 上传头像
-    if (avatarFile.value) {
-      const formData = new FormData()
-      formData.append('image', avatarFile.value)
-      const { data } = await uploadImage(formData)
-      registerForm.value.avatar = data.url
-    }
-
     // 调用注册接口
     await userRegister(registerForm.value)
 
@@ -105,6 +95,14 @@ const handleRegister = async () => {
   } finally {
     loading.close()
   }
+}
+
+const customRequest = async (options:any) => {
+  const formData = new FormData()
+  formData.append('file',options.file);
+  uploadImage(formData).then(res => {
+    registerForm.value.avatar = res.data.data;
+  })
 }
 </script>
 
@@ -169,6 +167,7 @@ const handleRegister = async () => {
                 action="#"
                 :show-file-list="false"
                 :before-upload="beforeUpload"
+                :http-request="customRequest"
             >
               <div class="avatar-container">
                 <img
