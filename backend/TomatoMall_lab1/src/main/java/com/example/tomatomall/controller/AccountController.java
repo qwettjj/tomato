@@ -19,8 +19,8 @@ public class AccountController {
      * 获取用户详情
      */
     @GetMapping("/info")
-    public Response<AccountVO> getUser() {
-        return Response.buildSuccess(accountService.getAccount());
+    public Response<AccountVO> getUser(@RequestParam("phone") String phone) {
+        return Response.buildSuccess(accountService.getAccount(phone));
     }
 
     /**
@@ -43,7 +43,7 @@ public class AccountController {
      * 登录
      */
     @PostMapping("/login")
-    public Response<Boolean> login(@RequestParam("phone") String phone, @RequestParam("password") String password) {
+    public Response<String> login(@RequestParam("phone") String phone, @RequestParam("password") String password) {
         return Response.buildSuccess(accountService.login(phone, password));
     }
 }

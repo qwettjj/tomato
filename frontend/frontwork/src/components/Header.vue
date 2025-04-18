@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {router} from '@/router'
-import {parseRole} from "@/utils"
+import {router} from '../router'
+import {parseRole} from "../utils"
 import {User, SwitchButton, ShoppingCart} from "@element-plus/icons-vue"   // 添加了ShoppingCart图标
 import { ElMessageBox } from 'element-plus'
 const role = sessionStorage.getItem('role')    //登录的时候插入的

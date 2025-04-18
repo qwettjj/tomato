@@ -10,7 +10,7 @@ const router = useRouter()
 
 // 用户信息响应式变量
 const userName = ref('')
-const role = ref('')
+const role = ref('' || "ADMIN" )
 const phone = ref('')
 const email = ref('')
 const address = ref('')
@@ -41,16 +41,19 @@ const changeDisabled = ref(true)
 const fetchUserInfo = async () => {
   const loading = ElLoading.service({ fullscreen: true })
   try {
-    const response = await userInfo()
-    const { userName, role, phone, email, address, avatar } = response.data
+    console.log("nihao")
+    const response = await userInfo(sessionStorage.getItem('phone'))
+    console.log(response)
 
     // 更新响应式变量
-    userName.value = userName
-    role.value = role
-    phone.value = phone
-    email.value = email
-    address.value = address
-    avatar.value = avatar
+    userName.value = response.data.userName
+    role.value = response.data.role
+    phone.value = response.data.phone
+    email.value = response.data.email
+    address.value = response.data.address
+    avatar.value = response.data.avatar
+
+    console.log("更新完成")
 
     // 初始化编辑表单
     editForm.value = {
@@ -71,6 +74,7 @@ const fetchUserInfo = async () => {
     sessionStorage.setItem('avatar', avatar)
 
   } catch (error) {
+    console.log(error)
     ElMessage.error('获取用户信息失败')
   } finally {
     loading.close()

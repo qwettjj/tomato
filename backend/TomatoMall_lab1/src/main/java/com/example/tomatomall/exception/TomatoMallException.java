@@ -19,5 +19,9 @@ public class TomatoMallException extends RuntimeException {
     public static TomatoMallException productNotFound() { return new TomatoMallException("商品不存在");}
 
     public static TomatoMallException fileUploadFail() { return new TomatoMallException("图片文件上传失败");}
+
+    public static TomatoMallException notLogin() { return new TomatoMallException("未登录");}
+
+    public static TomatoMallException test() {return new TomatoMallException("test");}
 }
 

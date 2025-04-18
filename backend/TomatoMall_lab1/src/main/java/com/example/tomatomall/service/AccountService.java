@@ -5,9 +5,9 @@ import com.example.tomatomall.vo.AccountVO;
 public interface AccountService {
     Boolean register(AccountVO accountVO);
 
-    Boolean login(String phone, String password);
+    String login(String phone, String password);
 
-    AccountVO getAccount();
+    AccountVO getAccount(String phone);
 
     Boolean updateAccount(AccountVO accountVO);
 }

@@ -38,7 +38,7 @@ public class AccountVO {
         account.setPassword(this.password);
         account.setPhone(this.phone);
         account.setEmail(this.email);
-        account.setAdress(this.address);
+        account.setAddress(this.address);
         account.setRole(this.role);
         account.setAvatar(this.avatar);
         account.setCreateTime(this.createTime);

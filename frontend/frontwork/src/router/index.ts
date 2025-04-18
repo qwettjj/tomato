@@ -32,12 +32,12 @@ const router = createRouter({
         },
         {
             path: '/home',
-            redirect: '/car',
+            redirect: '/cart',
             component: () => import('../views/Home.vue'),
             children: [
                 {
-                    path: 'car',
-                    name: 'Car',
+                    path: 'cart',
+                    name: 'Cart',
                     component: () => import('../views/users/Cart.vue'),
                     meta: {title: '购物车'}
                 },

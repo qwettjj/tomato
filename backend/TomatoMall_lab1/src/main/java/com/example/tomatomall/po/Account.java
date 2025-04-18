@@ -37,8 +37,8 @@ public class Account {
     private Date createTime;
 
     @Basic
-    @Column(name = "adress")
-    private String adress;
+    @Column(name = "address")
+    private String address;
 
     @Basic
     @Column(name = "avatar")
@@ -60,7 +60,7 @@ public class Account {
         accountVO.setPhone(this.phone);
         accountVO.setPassword(this.password);
         accountVO.setCreateTime(this.createTime);
-        accountVO.setAddress(this.adress);
+        accountVO.setAddress(this.address);
         accountVO.setAvatar(this.avatar);
         accountVO.setEmail(this.email);
         accountVO.setRole(this.role);

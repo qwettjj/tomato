@@ -33,6 +33,7 @@ service.interceptors.response.use(
     },
     error => {
         console.log(error);
+        console.error(error.config);
         return Promise.reject();
     }
 )

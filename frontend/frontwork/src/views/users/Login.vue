@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElForm, ElFormItem, ElButton, ElInput, ElMessage, ElLoading } from 'element-plus';
-import { userLogin } from "../../api/accounts";
+import { userLogin,userInfo } from "../../api/accounts";
 
 const router = useRouter();
 
@@ -17,45 +17,47 @@ const isFormValid = computed(() => phone.value && isPhoneValid.value && password
 
 // 登录处理
 const handleLogin = async () => {
-  const loading = ElLoading.service({
-    lock: true,
-    text: '登录中...',
-    background: 'rgba(0, 0, 0, 0.7)'
-  });
-
-  try {
-    // 调用API接口
-    const response = await userLogin({
-      phone: phone.value,
-      password: password.value
-    }).then(res => {
-      console.log(res);
+  // const loading = ElLoading.service({
+  //   lock: true,
+  //   text: '登录中...',
+  //   background: 'rgba(0, 0, 0, 0.7)'
+  // });
+  userLogin({
+    phone: phone.value,
+    password: password.value
+  }).then(res => {
+    console.log(res);
+    if (res.code === '200') {
       console.log("hello");
-    });
+      ElMessage({
+        message: "登录成功！",
+        type: 'success',
+        center: true,
+      })
+      const token = res.data
+      sessionStorage.setItem('token', token)
+      sessionStorage.setItem('phone', phone.value)
 
-    // 存储返回数据（根据实际接口返回结构调整）
-    const { token, role, userName } = response.data;
-    sessionStorage.setItem('token', token);
-    sessionStorage.setItem('role', role);
-    sessionStorage.setItem('userName', userName);
-    sessionStorage.setItem('phone', phone.value);
+      userInfo().then(res => {
+        console.log(res)
+        // sessionStorage.setItem('name', res.data.result.name)
+        // sessionStorage.setItem('role', res.data.result.role)
+        // router.push({path: "/home/dashboard"})
+      })
 
-    ElMessage.success('登录成功');
+      // router.push({path: "/home/dashboard"})
 
-    // 根据角色跳转（根据路由配置调整）
-    if (role === 'ADMIN') {
-      router.push({ name: 'Dashboard' });
-    } else {
-      router.push({ name: 'AllProduct' });
+    } else if (res.status === '400') {
+       console.log(res);
+      ElMessage({
+        message: res.data.msg,
+        type: 'error',
+        center: true,
+      })
+      password.value = ''
     }
+  })
 
-  }
-  catch (error) {
-    ElMessage.error(error.response?.data?.message || '登录失败');
-    password.value = '';
-  } finally {
-    loading.close();
-  }
 }
 </script>
 
