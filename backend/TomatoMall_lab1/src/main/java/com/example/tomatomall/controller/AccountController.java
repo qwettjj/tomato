@@ -19,8 +19,8 @@ public class AccountController {
      * 获取用户详情
      */
     @GetMapping("/info")
-    public Response<AccountVO> getUser(@RequestParam("phone") String phone) {
-        return Response.buildSuccess(accountService.getAccount(phone));
+    public Response<AccountVO> getUser() {
+        return Response.buildSuccess(accountService.getAccount());
     }
 
     /**

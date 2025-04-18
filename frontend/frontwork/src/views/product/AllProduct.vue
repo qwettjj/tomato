@@ -93,6 +93,7 @@ const fetchProducts = async () => {
     loading.value = true
     error.value = null
     const data = await getAllProducts()
+    console.log(data)
     products.value = data.map(item => ({
       ...item,
       rate: item.rate || 0  // 处理未评分情况

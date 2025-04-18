@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -42,12 +43,11 @@ public class SecurityConfig {
                 .cors()  // 启用 Spring Security CORS 支持
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/accounts/login", "api/accounts/create").permitAll()  // 公开接口
-                .anyRequest().authenticated()  // 需要认证的请求
-//                .and()
-//                .formLogin().permitAll()  // 启用表单登录
+                .antMatchers("/api/accounts/login", "/api/accounts/create").permitAll()  // 公开接口
+                .anyRequest().permitAll()
                 .and()
-                .httpBasic();  // 启用基本认证
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);  // 需要认证的请求
+//
         return http.build();
     }
 }

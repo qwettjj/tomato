@@ -42,7 +42,7 @@ const fetchUserInfo = async () => {
   const loading = ElLoading.service({ fullscreen: true })
   try {
     console.log("nihao")
-    const response = await userInfo(sessionStorage.getItem('phone'))
+    const response = await userInfo()
     console.log(response)
 
     // 更新响应式变量

@@ -85,7 +85,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountVO getAccount(String phone) {
+    public AccountVO getAccount() {
         Account account = securityUtil.getCurrentAccount();
 //        Account account = accountRepository.findByPhone(phone);
         return account.toVO();

@@ -38,14 +38,14 @@ const handleLogin = async () => {
       sessionStorage.setItem('token', token)
       sessionStorage.setItem('phone', phone.value)
 
-      userInfo().then(res => {
-        console.log(res)
-        // sessionStorage.setItem('name', res.data.result.name)
-        // sessionStorage.setItem('role', res.data.result.role)
-        // router.push({path: "/home/dashboard"})
-      })
+      // userInfo(token).then(res => {
+      //   console.log(res)
+      //   // sessionStorage.setItem('name', res.data.result.name)
+      //   // sessionStorage.setItem('role', res.data.result.role)
+      //   // router.push({path: "/home/dashboard"})
+      // })
 
-      // router.push({path: "/home/dashboard"})
+      router.push({path: "/home/dashboard"})
 
     } else if (res.status === '400') {
        console.log(res);

@@ -7,7 +7,7 @@ public interface AccountService {
 
     String login(String phone, String password);
 
-    AccountVO getAccount(String phone);
+    AccountVO getAccount();
 
     Boolean updateAccount(AccountVO accountVO);
 }

@@ -56,10 +56,7 @@ export const userUpdate = (updateInfo: UpdateInfo) => {
 
 // 获取当前用户信息接口
 export const userInfo = (token:string) => {
-    return axios.get(`${ACCOUNTS_MODULE}/info`,{headers: {
-        Authorization: `Bearer ${token}`
-    }       
-    })
+    return axios.get(`${ACCOUNTS_MODULE}/info`)
         .then(res => {
             return res.data // 假设后端返回的数据在 res.data 中
         })
