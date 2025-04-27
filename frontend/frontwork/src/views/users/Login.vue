@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElForm, ElFormItem, ElButton, ElInput, ElMessage, ElLoading } from 'element-plus';
-import { userLogin,userInfo } from "../../api/accounts";
+import { userLogin } from "../../api/accounts";
 
 const router = useRouter();
 

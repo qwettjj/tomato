@@ -100,6 +100,20 @@ const router = createRouter({
             ]
         },
         {
+            path: '/home',
+            redirect: '/order',
+            component: () => import('../views/Home.vue'),
+            children: [
+                {
+                    path: '/order',
+                    name: 'Order',
+                    component: () => import('../views/users/Order.vue'),
+                    meta: {title: '订单'},
+
+                },
+            ]
+        },
+        {
             path: '/404',
             component: () => import('../views/NotFound.vue'),
             meta: { title: '404' }

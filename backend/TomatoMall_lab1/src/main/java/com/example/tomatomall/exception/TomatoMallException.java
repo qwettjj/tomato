@@ -23,5 +23,7 @@ public class TomatoMallException extends RuntimeException {
     public static TomatoMallException notLogin() { return new TomatoMallException("未登录");}
 
     public static TomatoMallException test() {return new TomatoMallException("test");}
+
+    public static Exception cartItemNotFound() {return new TomatoMallException("未在购物车中找到该物品");}
 }
 

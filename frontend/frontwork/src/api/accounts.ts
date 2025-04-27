@@ -1,7 +1,6 @@
 import { axios } from '../utils/request'
 import { ACCOUNTS_MODULE } from './_prefix'
 
-// 登录参数类型
 type LoginInfo = {
     phone: string
     password: string
@@ -17,7 +16,6 @@ type RegisterInfo = {
     avatar: string
 }
 
-// 前端需要提供修改这些信息的页面
 type UpdateInfo = {
     userName?: string
     password?: string
@@ -40,7 +38,7 @@ export const userRegister = (registerInfo: RegisterInfo) => {
         headers: { 'Content-Type': 'application/json' }
     })
         .then(res => {
-            return res.data // 假设后端返回的数据在 res.data 中
+            return res.data
         })
 }
 
@@ -50,7 +48,7 @@ export const userUpdate = (updateInfo: UpdateInfo) => {
         headers: { 'Content-Type': 'application/json' }
     })
         .then(res => {
-            return res.data // 假设后端返回的数据在 res.data 中
+            return res.data
         })
 }
 
@@ -58,6 +56,6 @@ export const userUpdate = (updateInfo: UpdateInfo) => {
 export const userInfo = (token:string) => {
     return axios.get(`${ACCOUNTS_MODULE}/info`)
         .then(res => {
-            return res.data // 假设后端返回的数据在 res.data 中
+            return res.data
         })
 }

@@ -43,6 +43,7 @@ public class AccountServiceImpl implements AccountService {
         String newPassword = passwordEncoder.encode(newAccount.getPassword());
         newAccount.setPassword(newPassword);
         newAccount.setCreateTime(new Date());
+
         accountRepository.save(newAccount);
         return true;
     }
@@ -87,7 +88,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountVO getAccount() {
         Account account = securityUtil.getCurrentAccount();
-//        Account account = accountRepository.findByPhone(phone);
         return account.toVO();
     }
 }

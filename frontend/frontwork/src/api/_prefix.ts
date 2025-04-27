@@ -4,8 +4,14 @@ export const API_MODULE = '/api'
 //用户模块
 export const ACCOUNTS_MODULE = `${API_MODULE}/accounts`
 
-//商店模块
-export const STORE_MODULE = `${API_MODULE}/stores`
+//购物车模块
+export const CART_MODULE = `${API_MODULE}/cart`
 
 //商品模块
 export const PRODUCT_MODULE = `${API_MODULE}/products`
+
+//订单模块
+export const ORDER_MODULE = `${API_MODULE}/orders`
+
+//支付模块
+export const PAYMENT_MODULE = `${API_MODULE}/alipay`

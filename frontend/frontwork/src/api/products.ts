@@ -14,7 +14,7 @@ export type ProductVO = {
     price: number;             // 价格
     rate?: number;             // 评分（可选）
     description: string;       // 描述
-    cover: string;             // 封面图URL
+    cover?: string;             // 封面图URL
     detail?: string;           // 详情（可选）
     amount: number;            // 库存数量
     frozen?: number;           // 冻结数量（可选）

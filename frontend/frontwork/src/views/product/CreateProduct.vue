@@ -2,6 +2,8 @@
   <div class="product-creation-container">
     <div class="product-creation">
       <h1>{{ currentStep === 1 ? '创建商品' : '添加商品规格' }}</h1>
+
+      <!-- 第一步：基础信息 -->
       <el-form
           :model="form"
           :rules="rules"
@@ -44,21 +46,33 @@
         </el-form-item>
 
         <!-- 商品封面 -->
-        <el-form-item label="商品封面" prop="cover">
+        <el-form-item label="商品封面">
           <el-upload
               action="#"
               list-type="picture-card"
-              :auto-upload="false"
-              :on-change="handleImageChange"
+              :auto-upload="true"
+              :before-upload="beforeUpload"
               :on-remove="handleImageRemove"
+              :http-request="customRequest"
               :limit="1"
           >
             <div class="upload-area">
-              <el-icon><Plus /></el-icon>
-              <div class="upload-text">点击上传图片</div>
+              <img
+                  v-if="previewUrl || form.cover"
+                  :src="previewUrl || form.cover"
+                  class="cover-preview"
+              >
+              <div v-else class="upload-placeholder">
+                <el-icon><Plus /></el-icon>
+                <div class="upload-text">点击上传封面</div>
+              </div>
+              <div v-if="previewUrl || form.cover" class="cover-mask">
+                <el-icon><Plus /></el-icon>
+                <span>更换封面</span>
+              </div>
             </div>
-            <template #file="{ file }">
-              <img class="el-upload-list__item-thumbnail" :src="file.url"  alt=""/>
+            <template #tip>
+              <div class="upload-tip">支持JPG/PNG格式，大小不超过2MB</div>
             </template>
           </el-upload>
         </el-form-item>
@@ -99,7 +113,7 @@
         </el-form-item>
       </el-form>
 
-      <!-- 规格信息表单 -->
+      <!-- 第二步：规格信息 -->
       <div v-if="currentStep === 2">
         <el-form
             :model="specificationForm"
@@ -140,7 +154,7 @@
             <el-button
                 type="success"
                 @click="submitForm"
-                :disabled="specificationForm.specs.length === 0"
+                :disabled="!specFormValid"
                 :loading="loading"
             >创建商品</el-button>
           </el-form-item>
@@ -151,16 +165,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed,watch} from 'vue'
 import { ElMessage, ElLoading } from 'element-plus'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import { addProduct } from '../../api/products'
 import { uploadImage } from '../../api/tool'
 import type { ProductVO, Specification } from '../../api/products'
 
-// 当前步骤
+// 响应式数据
 const currentStep = ref(1)
 const loading = ref(false)
+const previewUrl = ref('')
+const productForm = ref()
+const specForm = ref()
 
 // 表单数据
 const form = ref<Omit<ProductVO, 'id' | 'specifications'>>({
@@ -172,12 +189,11 @@ const form = ref<Omit<ProductVO, 'id' | 'specifications'>>({
   detail: ''
 })
 
-// 规格表单数据
 const specificationForm = ref<{ specs: Specification[] }>({
   specs: [{ item: '', value: '' }]
 })
 
-// 表单验证规则
+// 验证规则
 const rules = {
   productName: [
     { required: true, message: '请输入商品名称', trigger: 'blur' },
@@ -202,7 +218,6 @@ const rules = {
   ]
 }
 
-// 规格验证规则
 const specRules = {
   item: [
     { required: true, message: '请输入规格名称', trigger: 'blur' },
@@ -214,7 +229,6 @@ const specRules = {
   ]
 }
 
-// 表单有效性
 const formValid = computed(() => {
   return (
       form.value.productName &&
@@ -224,30 +238,45 @@ const formValid = computed(() => {
   )
 })
 
-// 图片上传处理
-const handleImageChange = async (file: any) => {
-  try {
-    const loading = ElLoading.service({
-      lock: true,
-      text: '上传图片中...'
-    })
+const specFormValid = computed(() => {
+  return specificationForm.value.specs.every(spec =>
+      spec.item.trim() &&
+      spec.value.trim() &&
+      spec.item.length <= 50 &&
+      spec.value.length <= 255
+  )
+})
 
-    const formData = new FormData()
-    formData.append('image', file.raw)
-    const { data } = await uploadImage(formData)
+// 图片处理
+const beforeUpload = (file: File) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt2M = file.size / 1024 / 1024 < 2
 
-    form.value.cover = data.url
-    file.url = data.url
-  } catch (error) {
-    ElMessage.error('图片上传失败')
-  } finally {
-    loading.close()
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
   }
+  if (!isLt2M) {
+    ElMessage.error('图片大小不能超过2MB!')
+    return false
+  }
+
+  previewUrl.value = URL.createObjectURL(file)
+  return true
 }
 
-// 图片移除处理
+const customRequest = async (options:any) => {
+  const formData = new FormData()
+  formData.append('file',options.file);
+  console.log("we are in customRequst")
+  uploadImage(formData).then(res => {
+    console.log(res.data.data)
+    form.value.cover = res.data.data;
+  })
+}
 const handleImageRemove = () => {
   form.value.cover = ''
+  previewUrl.value = ''
 }
 
 // 规格操作
@@ -261,30 +290,37 @@ const removeSpec = (index: number) => {
   }
 }
 
-// 步骤切换
-const nextStep = () => {
-  if (!formValid.value) {
+// 分步操作
+const nextStep = async () => {
+  try {
+    await productForm.value.validate()
+    if (formValid.value) {
+      currentStep.value = 2
+    }
+  } catch (error) {
     ElMessage.warning('请完成所有必填项')
-    return
   }
-  currentStep.value = 2
 }
 
 const prevStep = () => {
   currentStep.value = 1
 }
 
-// 提交表单
+// 表单提交
 const submitForm = async () => {
-  loading.value = true
   try {
+    if (currentStep.value === 1) return
+
+    // 验证规格表单
+    await specForm.value.validate()
+
+    loading.value = true
     const productData: ProductVO = {
       ...form.value,
       specifications: specificationForm.value.specs
     }
 
     await addProduct(productData)
-
     ElMessage.success('商品创建成功')
     resetForm()
     currentStep.value = 1
@@ -309,7 +345,101 @@ const resetForm = () => {
   specificationForm.value = {
     specs: [{ item: '', value: '' }]
   }
+  previewUrl.value = ''
 }
+
+watch(formValid, (val) => {
+  if (!val) {
+    console.warn('[formValid 检查失败]')
+    console.log('商品名填写:', !!form.value.productName)
+    console.log('价格有效:', form.value.price > 0)
+    console.log('库存有效:', form.value.amount > 0)
+    console.log('封面有效：', !!form.value.cover)
+  }
+})
 </script>
 
-<!-- 保持原有样式不变 -->
+<style scoped>
+/* 保持原有样式不变 */
+.product-creation-container {
+  padding: 20px;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+.product-creation {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #303133;
+}
+
+.upload-area {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+.cover-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8c939d;
+}
+
+.upload-text {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.cover-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: 6px;
+}
+
+.cover-mask:hover {
+  opacity: 1;
+}
+
+.upload-tip {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 8px;
+}
+
+.spec-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+</style>

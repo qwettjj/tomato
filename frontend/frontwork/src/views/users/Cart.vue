@@ -5,6 +5,13 @@
     <!-- 购物车商品列表 -->
     <div v-if="cartItems.length > 0" class="cart-items">
       <div class="cart-header">
+        <div class="header-item select">
+          <el-checkbox
+              v-model="selectAll"
+              :indeterminate="isIndeterminate"
+              @change="handleSelectAll"
+          />
+        </div>
         <div class="header-item product-info">商品信息</div>
         <div class="header-item price">单价</div>
         <div class="header-item quantity">数量</div>
@@ -12,23 +19,52 @@
         <div class="header-item action">操作</div>
       </div>
 
-      <div v-for="item in cartItems" :key="item.cartItemId" class="cart-item">
+      <div v-for="item in cartItems" :key="item.id" class="cart-item">
+        <div class="select">
+          <el-checkbox
+              v-model="item.selected"
+              :disabled="!item.product"
+              @change="handleItemSelect"
+          />
+        </div>
         <div class="product-info">
-          <img :src="item.cover" :alt="item.title" class="product-image">
+          <img v-if="item.product" :src="item.product.cover" :alt="item.product.productName" class="product-image">
           <div class="product-details">
-            <h3>{{ item.title }}</h3>
-            <p class="description">{{ item.description }}</p>
+            <h3>{{ item.product?.productName || '商品加载中...' }}</h3>
+            <p class="description">{{ item.product?.description || '暂无描述' }}</p>
+            <p v-if="!item.product" class="loading-text">正在加载商品信息...</p>
           </div>
         </div>
-        <div class="price">¥{{ item.price.toFixed(2) }}</div>
+        <div class="price">¥{{ item.product?.price?.toFixed(2) || '0.00' }}</div>
         <div class="quantity">
-          <button @click="decreaseQuantity(item)" :disabled="item.quantity <= 1">-</button>
-          <input type="number" v-model.number="item.quantity" min="1" @change="updateQuantity(item)">
-          <button @click="increaseQuantity(item)">+</button>
+          <button
+              @click="updateQuantity(item, -1)"
+              :disabled="item.quantity <= 1 || !item.product"
+          >-</button>
+          <input
+              type="number"
+              v-model.number="item.quantity"
+              min="1"
+              @change="e => {
+                const value = parseInt(e.target.value)
+                if (value > item.product?.amount) {
+                  item.quantity = item.product?.amount || 1
+                }
+              }"
+              :disabled="!item.product"
+              :max="item.product?.amount"
+          >
+          <button
+              @click="updateQuantity(item, 1)"
+              :disabled="!item.product || item.quantity >= item.product?.amount"
+          >+</button>
         </div>
-        <div class="subtotal">¥{{ (item.price * item.quantity).toFixed(2) }}</div>
+        <div class="subtotal">
+          ¥{{ (item.product?.price * item.quantity || 0).toFixed(2) }}
+        </div>
         <div class="action">
-          <button @click="removeItem(item.cartItemId)" class="remove-btn">删除</button>
+          <!-- 修改点：参数改为 item.id -->
+          <button @click="removeItem(item.id)" class="remove-btn">删除</button>
         </div>
       </div>
     </div>
@@ -42,397 +78,481 @@
     <!-- 购物车汇总 -->
     <div v-if="cartItems.length > 0" class="cart-summary">
       <div class="summary-details">
-        <p>共 <span class="highlight">{{ totalItems }}</span> 件商品</p>
-        <p>合计: <span class="highlight">¥{{ totalAmount.toFixed(2) }}</span></p>
+        <p>已选 <span class="highlight">{{ selectedItemsCount }}</span> 件商品</p>
+        <p>合计: <span class="highlight">¥{{ selectedTotalAmount.toFixed(2) }}</span></p>
       </div>
-      <button class="checkout-btn">去结算</button>
-    </div>
-
-    <!-- 添加商品模拟区域 -->
-    <div class="add-product-demo">
-      <h3>模拟添加商品到购物车</h3>
-      <div class="demo-products">
-        <div class="demo-product" v-for="product in demoProducts" :key="product.productId">
-          <img :src="product.cover" :alt="product.title" class="demo-image">
-          <h4>{{ product.title }}</h4>
-          <p>¥{{ product.price.toFixed(2) }}</p>
-          <button @click="addToCart(product)">加入购物车</button>
-        </div>
-      </div>
+      <button
+          class="checkout-btn"
+          :disabled="!canCheckout"
+          @click="goToCheckout"
+      >去结算</button>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage, ElCheckbox } from 'element-plus';
+import type { AxiosError } from 'axios';
+import {
+  getCartItems,
+  removeCartItem,
+  updateCartItem
+} from '../../api/cartItem';
+import { getProduct } from '../../api/products';
+import { createOrder } from '../../api/order';
+import type { CartItem, Product } from '../../types';
 
-// 模拟购物车数据
-const cartItems = ref([
-  {
-    cartItemId: "201",
-    productId: "102",
-    title: "代码整洁之道",
-    price: 59.00,
-    description: "软件工程领域的经典著作",
-    cover: "https://example.com/covers/clean-code.jpg",
-    detail: "本书提出一种观念：代码质量与其整洁度成正比",
-    quantity: 1
-  },
-  {
-    cartItemId: "202",
-    productId: "101",
-    title: "深入理解Java虚拟机",
-    price: 99.50,
-    description: "Java开发者必读经典，全面讲解JVM工作原理",
-    cover: "https://example.com/covers/jvm.jpg",
-    detail: "本书详细讲解了Java虚拟机的体系结构、内存管理、字节码执行等核心内容",
-    quantity: 2
-  }
-]);
-
-// 模拟商品数据
-const demoProducts = ref([
-  {
-    productId: "101",
-    title: "深入理解Java虚拟机",
-    price: 99.50,
-    description: "Java开发者必读经典，全面讲解JVM工作原理",
-    cover: "https://example.com/covers/jvm.jpg",
-    detail: "本书详细讲解了Java虚拟机的体系结构、内存管理、字节码执行等核心内容",
-    stock: 10
-  },
-  {
-    productId: "102",
-    title: "代码整洁之道",
-    price: 59.00,
-    description: "软件工程领域的经典著作",
-    cover: "https://example.com/covers/clean-code.jpg",
-    detail: "本书提出一种观念：代码质量与其整洁度成正比",
-    stock: 5
-  },
-  {
-    productId: "103",
-    title: "设计模式",
-    price: 79.00,
-    description: "面向对象设计经典著作",
-    cover: "https://example.com/covers/design-patterns.jpg",
-    detail: "介绍23种经典设计模式",
-    stock: 8
-  }
-]);
+const router = useRouter();
+const cartItems = ref<Array<CartItem & { product?: Product; selected: boolean }>>([]);
+const allProductsLoaded = ref(false);
+const selectAll = ref(false);
+const isIndeterminate = ref(false);
 
 // 计算属性
-const totalItems = computed(() => cartItems.value.length);
-const totalAmount = computed(() => {
-  return cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+const selectedItems = computed(() =>
+    cartItems.value.filter(item => item.selected && item.product)
+);
+
+const selectedItemsCount = computed(() =>
+    selectedItems.value.reduce((sum, item) => sum + item.quantity, 0)
+);
+
+const selectedTotalAmount = computed(() =>
+    selectedItems.value.reduce((sum, item) => {
+      const price = item.product?.price || 0;
+      return sum + (price * item.quantity);
+    }, 0)
+);
+
+const canCheckout = computed(() =>
+    selectedItems.value.length > 0 && allProductsLoaded.value
+);
+
+// 加载购物车数据
+const loadCart = async () => {
+  try {
+    const res = await getCartItems();
+    const basicItems = res.data;
+
+    const itemsWithProducts = await Promise.all(
+        basicItems.map(async item => {
+          try {
+            const productRes = await getProduct(item.productId);
+            return {
+              ...item,
+              cartItemId : item.cartItemId,
+              id:item.cartItemId,
+              product: productRes.data,
+              quantity: item.quantity,
+              selected: false
+            };
+          } catch (error) {
+            console.error(`无法获取商品 ${item.productId} 的信息`, error);
+            return {
+              ...item,
+              cartItemId : item.cartItemId,
+              id:item.cartItemId,
+              product: null,
+              quantity: item.quantity,
+              selected: false
+            };
+          }
+        })
+    );
+
+    cartItems.value = itemsWithProducts;
+    allProductsLoaded.value = itemsWithProducts.every(item => !!item.product);
+    selectAll.value = false;
+    isIndeterminate.value = false;
+    updateSelectAllState();
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    ElMessage.error(axiosError.response?.data?.message || '获取购物车失败');
+  }
+};
+
+// 更新全选状态
+const updateSelectAllState = () => {
+  const selectedCount = selectedItems.value.length;
+  const totalCount = cartItems.value.filter(item => item.product).length;
+  selectAll.value = selectedCount === totalCount && totalCount > 0;
+  isIndeterminate.value = selectedCount > 0 && selectedCount < totalCount;
+};
+
+// 全选/取消全选
+const handleSelectAll = (val: boolean) => {
+  cartItems.value.forEach(item => {
+    if (item.product) {
+      item.selected = val;
+    }
+  });
+};
+
+// 单个商品选择
+const handleItemSelect = () => {
+  updateSelectAllState();
+};
+
+// 更新商品数量
+const updateQuantity = async (item: CartItem, change: number) => {
+  if (!item.product) {
+    ElMessage.warning('商品信息未加载完成，请稍后');
+    return;
+  }
+
+  try {
+    let newQuantity = item.quantity;
+
+    if (change === 1) {
+      newQuantity += 1;
+    } else if (change === -1) {
+      newQuantity -= 1;
+    } else {
+      newQuantity = Math.max(1, newQuantity);
+    }
+
+    // 增强边界检查
+    newQuantity = Math.max(1, Math.min(newQuantity, item.product.amount));
+
+    await updateCartItem({
+      productId: item.productId,
+      quantity: newQuantity
+    });
+
+    item.quantity = newQuantity;
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    ElMessage.error(axiosError.response?.data?.message || '更新失败');
+    await loadCart();
+  }
+};
+
+// 删除商品
+const removeItem = async (cartItemId: number) => {
+  try {
+    await removeCartItem(cartItemId);
+    ElMessage.success('商品已移除');
+    cartItems.value = cartItems.value.filter(item => item.id !== cartItemId);
+    updateSelectAllState();
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    ElMessage.error(axiosError.response?.data?.message || '删除失败');
+  }
+};
+
+// 结算功能
+const goToCheckout = async () => {
+  try {
+    const selectedCartItemIds = selectedItems.value
+        .filter(item => !!item.cartItemId) // 添加过滤确保有效ID
+        .map(item => item.cartItemId!); // 非空断言
+    console.log(selectedTotalAmount.value,);
+    console.log(selectedCartItemIds)
+    const res = await createOrder({
+      totalAmount: selectedTotalAmount.value,
+      paymentMethod: "Alipay",
+      cartItemId: selectedCartItemIds
+    });
+
+    console.log(res.data);
+    router.push({
+      path: '/order',
+      query: {
+        orderId: res.data,
+        isDirect : false,
+        amount: selectedTotalAmount.value.toFixed(2),
+        cartItemIds: selectedCartItemIds
+      }
+    });
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    let errorMessage = '创建订单失败';
+    if (axiosError.response) {
+      errorMessage = (axiosError.response.data as any)?.message || axiosError.message;
+    }
+    ElMessage.error(errorMessage);
+  }
+};
+
+onMounted(() => {
+  loadCart();
 });
-
-// 方法
-const addToCart = (product) => {
-  // 检查是否已在购物车中
-  const existingItem = cartItems.value.find(item => item.productId === product.productId);
-
-  if (existingItem) {
-    // 如果已存在，增加数量
-    if (existingItem.quantity < product.stock) {
-      existingItem.quantity += 1;
-      alert(`已增加 ${product.title} 的数量`);
-    } else {
-      alert(`无法添加，库存不足 (剩余 ${product.stock} 件)`);
-    }
-  } else {
-    // 如果不存在，添加新商品
-    if (product.stock > 0) {
-      cartItems.value.push({
-        cartItemId: `20${cartItems.value.length + 1}`,
-        productId: product.productId,
-        title: product.title,
-        price: product.price,
-        description: product.description,
-        cover: product.cover,
-        detail: product.detail,
-        quantity: 1
-      });
-      alert(`已添加 ${product.title} 到购物车`);
-    } else {
-      alert(`无法添加，库存不足 (剩余 ${product.stock} 件)`);
-    }
-  }
-};
-
-const removeItem = (cartItemId) => {
-  const index = cartItems.value.findIndex(item => item.cartItemId === cartItemId);
-  if (index !== -1) {
-    const removedItem = cartItems.value[index];
-    cartItems.value.splice(index, 1);
-    alert(`已移除 ${removedItem.title}`);
-  }
-};
-
-const increaseQuantity = (item) => {
-  const product = demoProducts.value.find(p => p.productId === item.productId);
-  if (item.quantity < product.stock) {
-    item.quantity += 1;
-  } else {
-    alert(`无法增加，库存不足 (剩余 ${product.stock} 件)`);
-  }
-};
-
-const decreaseQuantity = (item) => {
-  if (item.quantity > 1) {
-    item.quantity -= 1;
-  }
-};
-
-const updateQuantity = (item) => {
-  const product = demoProducts.value.find(p => p.productId === item.productId);
-  if (item.quantity < 1) {
-    item.quantity = 1;
-  } else if (item.quantity > product.stock) {
-    item.quantity = product.stock;
-    alert(`数量超过库存，已调整为最大可用数量 ${product.stock}`);
-  }
-};
 </script>
 
 <style scoped>
 .cart-container {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
 h1 {
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: #2c3e50;
   text-align: center;
-  margin-bottom: 30px;
-  color: #333;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
-/* 购物车商品列表样式 */
-.cart-items {
-  border: 1px solid #eee;
-  border-radius: 5px;
-  margin-bottom: 30px;
-}
-
+/* 购物车头部 */
 .cart-header {
   display: flex;
-  padding: 15px;
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #eee;
-  font-weight: bold;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 2px solid #f0f2f5;
+  font-weight: 500;
+  color: #7f8c8d;
+  background-color: #f8f9fa;
+  border-radius: 8px 8px 0 0;
 }
 
-.header-item {
-  padding: 0 10px;
-}
-
-.product-info {
-  flex: 3;
-}
-
-.price, .quantity, .subtotal, .action {
-  flex: 1;
-  text-align: center;
-}
-
+/* 购物车商品项 */
 .cart-item {
   display: flex;
   align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
+  padding: 20px 0;
+  border-bottom: 1px solid #eceff1;
+  transition: background-color 0.2s;
 }
 
-.product-info {
-  display: flex;
-  align-items: center;
+.cart-item:hover {
+  background-color: #fafafa;
 }
 
-.product-image {
-  width: 80px;
-  height: 100px;
-  object-fit: cover;
-  margin-right: 15px;
+/* 列宽分配 */
+.header-item,
+.cart-item > div {
+  flex: 1;
+  padding: 0 12px;
 }
 
-.product-details h3 {
-  margin: 0 0 5px 0;
-  font-size: 16px;
-}
-
-.description {
-  color: #666;
-  font-size: 14px;
-  margin: 0;
-}
-
-.quantity {
+.select {
+  flex: 0 0 60px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.quantity button {
-  width: 30px;
-  height: 30px;
-  border: 1px solid #ddd;
-  background-color: #f5f5f5;
-  cursor: pointer;
+.product-info {
+  flex: 3;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
+.price {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.quantity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.quantity button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background-color: #f5f6fa;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quantity button:hover:not(:disabled) {
+  background-color: #42b983;
+  color: white;
+}
+
+.quantity button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f6fa !important; /* 保持禁用状态颜色一致 */
+}
+
+
 .quantity input {
-  width: 50px;
-  height: 30px;
+  width: 60px;
+  height: 36px;
   text-align: center;
-  margin: 0 5px;
-  border: 1px solid #ddd;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.subtotal {
+  font-weight: 600;
+  color: #42b983;
+}
+
+/* 商品图片 */
+.product-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.product-details h3 {
+  font-size: 16px;
+  margin: 0 0 8px;
+  color: #34495e;
+  font-weight: 600;
+}
+
+.description {
+  font-size: 13px;
+  color: #95a5a6;
+  line-height: 1.4;
+  max-width: 400px;
+}
+
+/* 操作按钮 */
+.action {
+  text-align: center;
 }
 
 .remove-btn {
-  background-color: #ff4d4f;
+  padding: 8px 16px;
+  background-color: #ff4757;
   color: white;
   border: none;
-  padding: 5px 10px;
-  border-radius: 3px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .remove-btn:hover {
-  background-color: #ff7875;
+  background-color: #ff6b81;
 }
 
-/* 空购物车样式 */
+/* 空购物车 */
 .empty-cart {
   text-align: center;
-  padding: 50px;
-  border: 1px dashed #ddd;
-  border-radius: 5px;
-  margin-bottom: 30px;
+  padding: 60px 0;
+  color: #b2bec3;
 }
 
 .go-shopping {
   display: inline-block;
-  margin-top: 15px;
-  padding: 8px 20px;
-  background-color: #1890ff;
+  margin-top: 20px;
+  padding: 12px 30px;
+  background-color: #42b983;
   color: white;
   text-decoration: none;
-  border-radius: 3px;
+  border-radius: 25px;
+  transition: transform 0.2s;
 }
 
 .go-shopping:hover {
-  background-color: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 185, 131, 0.3);
 }
 
-/* 购物车汇总样式 */
+/* 购物车汇总 */
 .cart-summary {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 2px solid #f0f2f5;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
 }
 
-.summary-details {
-  margin-right: 30px;
-  text-align: right;
+.summary-details p {
+  margin: 8px 0;
+  font-size: 16px;
+  color: #34495e;
 }
 
 .highlight {
-  color: #f5222d;
+  color: #42b983;
+  font-weight: 700;
   font-size: 18px;
-  font-weight: bold;
 }
 
 .checkout-btn {
-  padding: 10px 30px;
-  background-color: #52c41a;
-  color: white;
-  border: none;
-  border-radius: 3px;
+  padding: 14px 45px;
   font-size: 16px;
-  cursor: pointer;
-}
-
-.checkout-btn:hover {
-  background-color: #73d13d;
-}
-
-/* 添加商品模拟区域 */
-.add-product-demo {
-  margin-top: 50px;
-  padding-top: 20px;
-  border-top: 1px dashed #ddd;
-}
-
-.demo-products {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.demo-product {
-  width: calc(33.333% - 20px);
-  padding: 15px;
-  border: 1px solid #eee;
-  border-radius: 5px;
-  text-align: center;
-}
-
-.demo-image {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  margin-bottom: 10px;
-}
-
-.demo-product button {
-  margin-top: 10px;
-  padding: 5px 15px;
-  background-color: #1890ff;
+  background-color: #42b983;
   color: white;
   border: none;
-  border-radius: 3px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 0.5px;
 }
 
-.demo-product button:hover {
-  background-color: #40a9ff;
+.checkout-btn:hover:not(:disabled) {
+  background-color: #36976d;
+  box-shadow: 0 4px 15px rgba(66, 185, 131, 0.4);
 }
 
+.checkout-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.loading-text {
+  color: #b2bec3;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
+  .cart-container {
+    padding: 20px;
+    margin: 20px;
+  }
+
   .cart-header {
     display: none;
   }
 
   .cart-item {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
     position: relative;
-    padding-bottom: 50px;
+    padding: 15px;
+    gap: 10px;
   }
 
-  .product-info, .price, .quantity, .subtotal {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-
-  .action {
+  .select {
     position: absolute;
-    right: 15px;
-    bottom: 15px;
+    left: 10px;
+    top: 10px;
   }
 
-  .demo-product {
-    width: calc(50% - 10px);
+  .product-info {
+    flex: 1 1 100%;
+    order: 1;
   }
-}
 
-@media (max-width: 480px) {
-  .demo-product {
+  .price,
+  .quantity,
+  .subtotal,
+  .action {
+    flex: 1 1 45%;
+    text-align: left;
+    padding: 5px;
+  }
+
+  .checkout-btn {
     width: 100%;
+    margin-top: 15px;
   }
 }
 </style>

@@ -46,7 +46,7 @@ function logout() {
 
       <!-- 添加购物车链接 -->
       <el-col :span="2" class="header-icon">
-        <router-link to="/home/car" v-slot="{ navigate }" class="header-link">
+        <router-link to="/home/cart" v-slot="{ navigate }" class="header-link">
           <span @click="navigate" class="header-text">购物车</span>
         </router-link>
       </el-col>

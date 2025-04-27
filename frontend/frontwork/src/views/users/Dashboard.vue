@@ -38,40 +38,41 @@ const isPasswordIdentical = ref(false)
 const changeDisabled = ref(true)
 
 // 初始化用户信息
+// 修改后的 fetchUserInfo 函数
 const fetchUserInfo = async () => {
   const loading = ElLoading.service({ fullscreen: true })
   try {
-    console.log("nihao")
     const response = await userInfo()
     console.log(response)
 
-    // 更新响应式变量
+    // 更新响应式变量（确保使用.value）
     userName.value = response.data.userName
     role.value = response.data.role
     phone.value = response.data.phone
     email.value = response.data.email
-    address.value = response.data.address
+    // 处理地址对象
+    address.value = typeof response.data.address === 'string' ?
+        response.data.address :
+        JSON.stringify(response.data.address)
     avatar.value = response.data.avatar
 
-    console.log("更新完成")
-
-    // 初始化编辑表单
+    // 正确初始化编辑表单（使用.value）
     editForm.value = {
-      userName: userName,
-      phone: phone,
-      email: email,
-      address: address,
+      userName: userName.value,
+      phone: phone.value,
+      email: email.value,
+      address: address.value,
       newPassword: '',
       confirmPassword: ''
     }
 
-    // 同步sessionStorage
-    sessionStorage.setItem('userName', userName)
-    sessionStorage.setItem('role', role)
-    sessionStorage.setItem('phone', phone)
-    sessionStorage.setItem('email', email)
-    sessionStorage.setItem('address', address)
-    sessionStorage.setItem('avatar', avatar)
+    // 安全存储到sessionStorage
+    sessionStorage.setItem('userName', userName.value)
+    sessionStorage.setItem('role', role.value)
+    sessionStorage.setItem('phone', phone.value)
+    sessionStorage.setItem('email', email.value)
+    sessionStorage.setItem('address', address.value)
+    sessionStorage.setItem('avatar', avatar.value)
 
   } catch (error) {
     console.log(error)

@@ -34,7 +34,7 @@
             <h1 class="title">{{ product.productName }}</h1>
             <div class="meta-info">
               <div class="price-section">
-                <span class="price">¥{{ product.price.toFixed(2) }}</span>
+                <span class="price">¥{{ formatPrice(product.price) }}</span>
                 <el-tag :type="product.amount > 0 ? 'success' : 'danger'" effect="dark">
                   {{ product.amount > 0 ? `库存 ${product.amount} 件` : '已售罄' }}
                 </el-tag>
@@ -103,6 +103,27 @@
       <el-empty description="未找到该商品信息" />
       <el-button type="primary" @click="$router.push('/home/allproduct')">返回商品列表</el-button>
     </div>
+
+    <!-- 🔥 加入购物车弹窗 -->
+    <el-dialog
+        v-model="showAddDialog"
+        title="选择购买数量"
+        width="30%"
+        :close-on-click-modal="false"
+    >
+      <div style="margin: 20px 0;">
+        <el-input-number
+            v-model="selectedQuantity"
+            :min="1"
+            :max="product?.amount || 1"
+            label="购买数量"
+        />
+      </div>
+      <template #footer>
+        <el-button @click="showAddDialog = false">取消</el-button>
+        <el-button type="primary" @click="confirmAddToCart">确认</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -113,20 +134,33 @@ import { ElMessage } from 'element-plus'
 import { Picture } from '@element-plus/icons-vue'
 import { getProduct } from '../../api/products'
 import type { ProductVO } from '../../api/products'
+import { addCartItem } from "../../api/cartItem";
+import { createOrderDirectly} from "../../api/order";
 
+
+// 路由相关
 const route = useRoute()
 const router = useRouter()
 const productId = Number(route.params.id)
+
+// 商品和状态
 const product = ref<ProductVO | null>(null)
 const loading = ref(true)
+const isBuyingNow = ref(false)
 
+// 加入购物车弹窗逻辑
+const showAddDialog = ref(false)
+const selectedQuantity = ref(1)
+
+// 获取商品详情
 const fetchProductDetail = async () => {
   try {
     loading.value = true
-    const data = await getProduct(productId)
+    const res = await getProduct(productId)
+    const data = res.data
     product.value = {
       ...data,
-      // 确保specifications字段存在
+      price: data.price ?? 0,
       specifications: data.specifications || []
     }
   } catch (error) {
@@ -137,24 +171,71 @@ const fetchProductDetail = async () => {
   }
 }
 
+// 图片错误处理
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
-  img.src = 'https://via.placeholder.com/400x500?text=Image+Not+Available'
+  img.src = 'https://dummyimage.com/400x500/cccccc/000000&text=图片加载失败'
 }
 
+// 打开选择数量弹窗
 const addToCart = () => {
-  ElMessage.success('已加入购物车')
-  // 实际应调用购物车API
+  selectedQuantity.value = 1
+  isBuyingNow.value = false
+  showAddDialog.value = true
 }
 
+// 确认加入购物车
+const confirmAddToCart = async () => {
+  try {
+    if (!product.value) return
+    const quantity = selectedQuantity.value
+
+    if (isBuyingNow.value) {
+      // ✅ 立即购买跳转页面，并携带数量
+      const createRes = await createOrderDirectly({
+        amount: selectedQuantity.value * product.value.price,
+        paymentMethod: 'alipay',
+        productId : product.value.id,
+        quantity : selectedQuantity.value
+      })
+      console.log(createRes.data)
+      router.push({
+        path: '/order',
+        query: {
+          orderId: createRes.data,
+          isDirect : true,
+          amount : selectedQuantity.value * product.value.price,
+          productId: product.value.id,
+          quantity : selectedQuantity.value
+        }
+      })
+    } else {
+      // ✅ 加入购物车
+      await addCartItem({
+        productId: product.value.id,
+        quantity: quantity
+      })
+      ElMessage.success('已加入购物车')
+    }
+
+    showAddDialog.value = false
+  } catch (error) {
+    ElMessage.error(isBuyingNow.value ? '跳转失败' : '加入购物车失败')
+  }
+}
+
+// 立即购买逻辑
 const buyNow = () => {
-  // 实际应跳转到订单确认页
-  router.push({
-    path: '/order/confirm',
-    query: { productId: product.value?.id }
-  })
+  selectedQuantity.value = 1
+  isBuyingNow.value = true
+  showAddDialog.value = true
+  // router.push({
+  //   path: '/order',
+  //   query: { productId: product.value?.id }
+  // })
 }
 
+// 页面挂载后获取数据
 onMounted(() => {
   if (isNaN(productId)) {
     ElMessage.error('无效的商品ID')
@@ -163,116 +244,33 @@ onMounted(() => {
   }
   fetchProductDetail()
 })
+
+// 格式化价格
+const formatPrice = (price: number | undefined) =>
+    typeof price === 'number' ? price.toFixed(2) : '暂无'
 </script>
 
 <style scoped>
 .product-detail-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  padding: 24px;
+  background-color: #fff;
 }
 
 .breadcrumb {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
 }
 
 .product-detail {
-  margin-top: 20px;
+  padding: 16px 0;
 }
 
-.title {
-  font-size: 24px;
-  margin-bottom: 15px;
-  color: #303133;
-}
-
-.meta-info {
-  margin-bottom: 30px;
-}
-
-.price-section {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
-}
-
-.price {
-  font-size: 28px;
-  color: #f56c6c;
-  font-weight: bold;
-}
-
-.rating {
-  margin: 10px 0;
-}
-
-.specifications {
-  margin: 30px 0;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-}
-
-.spec-item {
-  display: flex;
-  margin: 10px 0;
-  padding: 8px 12px;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.spec-label {
-  color: #606266;
-  min-width: 80px;
-}
-
-.spec-value {
-  color: #303133;
-  font-weight: 500;
-}
-
-.no-spec {
-  color: #909399;
+.product-image {
   text-align: center;
-  padding: 10px;
-}
-
-.description {
-  margin: 30px 0;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-}
-
-.description h3 {
-  margin-bottom: 10px;
-}
-
-.actions {
-  margin-top: 40px;
-  display: flex;
-  gap: 20px;
-}
-
-.product-content {
-  margin-top: 40px;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 4px;
-}
-
-.product-content h3 {
-  font-size: 20px;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.content {
-  line-height: 1.8;
-  color: #606266;
 }
 
 .image-error {
@@ -280,19 +278,102 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  color: #909399;
+  color: #999;
+  font-size: 14px;
+  padding: 20px;
 }
 
-.loading {
-  padding: 50px;
+.product-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.meta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.price-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.price {
+  font-size: 24px;
+  color: #f56c6c;
+  font-weight: bold;
+}
+
+.rating {
+  margin-top: 8px;
+}
+
+.specifications {
+  margin-top: 20px;
+}
+
+.specifications h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.spec-item {
+  margin-bottom: 6px;
+}
+
+.spec-label {
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.description {
+  margin-top: 20px;
+}
+
+.description h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.description p {
+  color: #666;
+}
+
+.actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+}
+
+.product-content {
+  margin-top: 40px;
+}
+
+.product-content h3 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.content {
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  color: #333;
+  line-height: 1.8;
 }
 
 .not-found {
-  margin-top: 100px;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  padding: 60px 0;
 }
+
 </style>

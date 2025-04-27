@@ -92,13 +92,21 @@ const fetchProducts = async () => {
   try {
     loading.value = true
     error.value = null
-    const data = await getAllProducts()
-    console.log(data)
-    products.value = data.map(item => ({
-      ...item,
-      rate: item.rate || 0  // 处理未评分情况
-    }))
-  } catch (err) {
+    const res = await getAllProducts()
+
+    if (res.code === '200' && Array.isArray(res.data)) {
+      products.value = res.data.map(item => ({
+        id: item.id,
+        productName: item.productName,
+        price: item.price,
+        rate: item.rate ?? 0,
+        cover: item.cover,
+        amount: item.amount,
+      }))
+    } else {
+      throw new Error('接口返回异常')
+    }
+  } catch (err: any) {
     error.value = err.message || '加载商品数据失败'
     ElMessage.error(error.value)
   } finally {
@@ -106,7 +114,6 @@ const fetchProducts = async () => {
   }
 }
 
-// 图片加载失败处理
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
   img.src = 'https://via.placeholder.com/280x280?text=Image+Not+Available'
@@ -229,11 +236,4 @@ h1 {
   align-items: center;
 }
 
-.el-skeleton {
-  width: 100%;
-}
-
-.el-skeleton__item {
-  margin: 10px;
-}
 </style>

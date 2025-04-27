@@ -6,7 +6,6 @@ import com.example.tomatomall.vo.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/api/accounts")

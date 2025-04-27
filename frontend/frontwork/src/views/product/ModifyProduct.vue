@@ -7,12 +7,23 @@
         </div>
       </template>
 
+      <!-- ✅ 显示原始商品信息 -->
+      <el-alert
+          v-if="originalForm"
+          title="商品原始信息"
+          type="info"
+          show-icon
+          class="mb-4"
+      >
+        <p>原名称：{{ originalForm.productName }}</p>
+        <p>原价格：¥{{ originalForm.price }}</p>
+        <p>原库存：{{ originalForm.amount }}</p>
+        <p>原描述：{{ originalForm.description }}</p>
+      </el-alert>
+
       <el-form :model="form" label-width="120px" v-loading="loading">
         <el-form-item label="商品名称" prop="productName">
-          <el-input
-              v-model="form.productName"
-              placeholder="请输入商品名称"
-          ></el-input>
+          <el-input v-model="form.productName" placeholder="请输入商品名称" />
         </el-form-item>
 
         <el-form-item label="商品价格" prop="price">
@@ -21,7 +32,7 @@
               :min="0"
               :precision="2"
               controls-position="right"
-          ></el-input-number>
+          />
         </el-form-item>
 
         <el-form-item label="库存数量" prop="amount">
@@ -29,7 +40,7 @@
               v-model="form.amount"
               :min="0"
               controls-position="right"
-          ></el-input-number>
+          />
         </el-form-item>
 
         <el-form-item label="商品描述">
@@ -38,7 +49,7 @@
               type="textarea"
               :rows="3"
               placeholder="请输入商品描述"
-          ></el-input>
+          />
         </el-form-item>
 
         <el-form-item label="商品详情">
@@ -47,7 +58,7 @@
               type="textarea"
               :rows="5"
               placeholder="请输入商品详细说明"
-          ></el-input>
+          />
         </el-form-item>
 
         <el-divider />
@@ -61,12 +72,12 @@
                 v-model="spec.item"
                 placeholder="规格名称"
                 style="width: 200px"
-            ></el-input>
+            />
             <el-input
                 v-model="spec.value"
                 placeholder="规格值"
                 style="width: 300px; margin-left: 10px"
-            ></el-input>
+            />
             <el-button
                 type="danger"
                 circle
@@ -86,6 +97,7 @@
         <el-form-item>
           <el-button type="primary" @click="updateProduct">更新商品</el-button>
           <el-button type="danger" @click="deleteProduct">删除商品</el-button>
+          <el-button @click="resetToOriginal">重置为原始信息</el-button>
           <el-button @click="goBack">返回</el-button>
         </el-form-item>
       </el-form>
@@ -100,7 +112,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import {
   getProduct,
-  updateProduct,
+  updateProduct as updateProductApi, // ✅ 重命名，避免冲突
   deleteProduct as deleteProductApi,
   type ProductVO,
   type Specification
@@ -121,10 +133,17 @@ const form = ref<ProductVO>({
   specifications: []
 })
 
+// ✅ 保存原始数据
+const originalForm = ref<ProductVO | null>(null)
+
 const loadProduct = async () => {
   try {
     loading.value = true
-    const product = await getProduct(id)
+    const res = await getProduct(id)
+    const product = res.data
+
+    originalForm.value = JSON.parse(JSON.stringify(product))
+
     form.value = {
       ...product,
       specifications: product.specifications || []
@@ -151,14 +170,15 @@ const removeSpec = (index: number) => {
 
 const updateProduct = async () => {
   try {
+    console.log("we are in update")
     loading.value = true
-    await updateProduct({
+    await updateProductApi({
       ...form.value,
       id: id,
       specifications: form.value.specifications
     })
     ElMessage.success('商品更新成功')
-    loadProduct() // 刷新数据
+    await loadProduct()
   } catch (error) {
     ElMessage.error(error.response?.data?.message || '更新失败')
   } finally {
@@ -180,6 +200,14 @@ const deleteProduct = () => {
       ElMessage.error('删除失败')
     }
   })
+}
+
+// ✅ 重置为原始信息
+const resetToOriginal = () => {
+  if (originalForm.value) {
+    form.value = JSON.parse(JSON.stringify(originalForm.value))
+    ElMessage.success('已重置为初始数据')
+  }
 }
 
 const goBack = () => {
@@ -216,5 +244,9 @@ onMounted(() => {
   padding: 10px;
   background-color: #f5f7fa;
   border-radius: 4px;
+}
+
+.mb-4 {
+  margin-bottom: 20px;
 }
 </style>
