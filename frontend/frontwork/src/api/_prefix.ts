@@ -15,3 +15,6 @@ export const ORDER_MODULE = `${API_MODULE}/orders`
 
 //支付模块
 export const PAYMENT_MODULE = `${API_MODULE}/alipay`
+
+//广告模块
+export const ADVERTISEMENT_MODULE = `${API_MODULE}/advertisements`
