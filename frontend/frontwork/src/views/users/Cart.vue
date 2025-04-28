@@ -72,7 +72,7 @@
     <!-- 空购物车提示 -->
     <div v-else class="empty-cart">
       <p>您的购物车还是空的~</p>
-      <router-link to="/products" class="go-shopping">去逛逛</router-link>
+      <router-link to="/allproduct" class="go-shopping">去逛逛</router-link>
     </div>
 
     <!-- 购物车汇总 -->

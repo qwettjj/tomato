@@ -48,8 +48,9 @@ const handleLogin = async () => {
       router.push({path: "/home/dashboard"})
 
     } else if (res.status === '400') {
+      console.log("没进来");
        console.log(res);
-      ElMessage({
+        ElMessage({
         message: res.data.msg,
         type: 'error',
         center: true,

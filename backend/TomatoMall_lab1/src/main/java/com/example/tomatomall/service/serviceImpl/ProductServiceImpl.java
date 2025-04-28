@@ -60,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Boolean deleteProduct(Integer id){
         Product product = productRepository.findById(id).isPresent() ? productRepository.findById(id).get() : null;
-        if(product != null){
+        if(product == null){
             throw TomatoMallException.productToChangeNotFound();
         }
         productRepository.delete(product);

@@ -38,7 +38,7 @@ function logout() {
       </el-col>
 
       <el-col :span="2">
-        <el-tag class="role-tag" size="large">{{ parseRole(role) }}管理员版</el-tag>
+        <el-tag class="role-tag" size="large">{{ parseRole(role) }}版</el-tag>
       </el-col>
 
       <el-col :span="12">

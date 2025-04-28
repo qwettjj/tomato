@@ -171,6 +171,8 @@ import { Plus, Delete } from '@element-plus/icons-vue'
 import { addProduct } from '../../api/products'
 import { uploadImage } from '../../api/tool'
 import type { ProductVO, Specification } from '../../api/products'
+import {router} from "../../router";
+
 
 // 响应式数据
 const currentStep = ref(1)
@@ -308,7 +310,7 @@ const prevStep = () => {
 
 // 表单提交
 const submitForm = async () => {
-  try {
+  // try {
     if (currentStep.value === 1) return
 
     // 验证规格表单
@@ -324,12 +326,15 @@ const submitForm = async () => {
     ElMessage.success('商品创建成功')
     resetForm()
     currentStep.value = 1
-    window.location.href = '/home/allproduct'
-  } catch (error) {
-    ElMessage.error(error.response?.data?.message || '创建商品失败')
-  } finally {
-    loading.value = false
-  }
+    console.log("即将进入跳转")
+    router.push({ path: "/allproduct" })
+
+  // }
+  // catch (error) {
+  //   ElMessage.error(error.response?.data?.message || '创建商品失败')
+  // } finally {
+  //   loading.value = false
+  // }
 }
 
 // 重置表单
