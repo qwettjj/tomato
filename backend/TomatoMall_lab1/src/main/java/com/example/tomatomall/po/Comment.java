@@ -42,7 +42,7 @@ public class Comment {
 
     @Basic
     @Column(name = "status")
-    private Integer status;
+    private Integer status; //记录帖子的状态，比如正在审核，已经删除等
 
     public CommentVO toVO(){
         CommentVO commentVO = new CommentVO();
