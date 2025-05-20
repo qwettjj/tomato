@@ -1,5 +1,6 @@
 package com.example.tomatomall.po;
 
+import com.example.tomatomall.vo.CircleVO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -57,7 +58,7 @@ public class Circle {
 
     @Basic
     @Column(name = "status")
-    private String status;
+    private Integer status;
 
 
 //    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -65,4 +66,14 @@ public class Circle {
 //
 //    @OneToOne(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private ReviewReply reply;
+
+    public CircleVO toVO(){
+        CircleVO vo = new CircleVO();
+        vo.setCover(this.cover);
+        vo.setDescription(this.description);
+        vo.setStatus(this.status);
+        vo.setTitle(this.title);
+        vo.setCreatorId(this.creatorId);
+        return vo;
+    }
 }

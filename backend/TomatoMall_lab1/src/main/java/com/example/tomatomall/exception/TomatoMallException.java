@@ -25,5 +25,19 @@ public class TomatoMallException extends RuntimeException {
     public static TomatoMallException test() {return new TomatoMallException("test");}
 
     public static Exception cartItemNotFound() {return new TomatoMallException("未在购物车中找到该物品");}
+
+    public static TomatoMallException alreadyJoinCircle() {return new TomatoMallException("您已加入该圈子");}
+
+    public static TomatoMallException circleNotExist() {return new TomatoMallException("圈子不存在");}
+
+    public static TomatoMallException NotCircleMember() {return new TomatoMallException("您不是该圈子成员");}
+
+    public static TomatoMallException postNotExist() {return new TomatoMallException("帖子不存在或已经被删除");}
+
+    public static TomatoMallException alreadyLike() {return new TomatoMallException("您已点赞过该帖子");}
+
+    public static TomatoMallException notAlreadyLike() {return new TomatoMallException("您未点赞过该帖子");}
+
+    public static TomatoMallException commentNotExist() {return new TomatoMallException("评论不存在");}
 }
 
