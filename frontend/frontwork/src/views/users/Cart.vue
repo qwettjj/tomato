@@ -101,7 +101,7 @@ import {
   updateCartItem
 } from '../../api/cartItem';
 import { getProduct } from '../../api/products';
-import { createOrder } from '../../api/order';
+import { createOrder } from '../../api/orders';
 import type { CartItem, Product } from '../../types';
 
 const router = useRouter();

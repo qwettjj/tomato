@@ -9,9 +9,9 @@ import java.util.List;
 public interface CartItemService {
     Boolean addCartItem(Integer productId, Integer quantity);
 
-    Boolean removeCartItem(Integer productId) throws Exception;
+    Boolean removeCartItem(Integer productId);
 
-    Boolean updateCartItem(Integer productId, Integer newQuantity) throws Exception;
+    Boolean updateCartItem(Integer productId, Integer newQuantity);
 
     List<CartItem> getCartItem();
 

@@ -64,9 +64,15 @@ public class Post {
 
     public PostVO toVO(){
         PostVO postVO = new PostVO();
+        postVO.setPostId(this.id);
         postVO.setCircleId(this.circleId);
+        postVO.setAccountId(this.accountId);
         postVO.setTitle(this.title);
         postVO.setContent(this.content);
+        postVO.setCreateTime(this.createTime);
+        postVO.setViewCount(this.viewCount);
+        postVO.setLikeCount(this.likeCount);
+        postVO.setCommentCount(this.commentCount);
         return postVO;
     }
 }

@@ -1,6 +1,7 @@
 
 package com.example.tomatomall.controller;
 
+import com.example.tomatomall.exception.TomatoMallException;
 import com.example.tomatomall.service.ProductService;
 import com.example.tomatomall.vo.ProductVO;
 import com.example.tomatomall.vo.Response;
@@ -17,27 +18,51 @@ public class ProductController {
 
     @PostMapping("/add")
     public Response<Boolean> addProduct(@RequestBody ProductVO productVO) {
-        return Response.buildSuccess(productService.addProduct(productVO));
+        try{
+            return Response.buildSuccess(productService.addProduct(productVO));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
+
     }
 
     @PutMapping("/update")
     public Response<Boolean> updateProduct(@RequestBody ProductVO productVO) {
-        return Response.buildSuccess(productService.updateProduct(productVO));
+        try{
+            return Response.buildSuccess(productService.updateProduct(productVO));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
+
     }
 
     @DeleteMapping("/{id}")
     public Response<Boolean> deleteProduct(@PathVariable Integer id) {
-        return Response.buildSuccess(productService.deleteProduct(id));
+        try{
+            return Response.buildSuccess(productService.deleteProduct(id));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
     }
 
     @GetMapping("/all")
     public Response<List<ProductVO>> getAllProducts() {
-        return Response.buildSuccess(productService.getAllProducts());
+        try{
+            return Response.buildSuccess(productService.getAllProducts());
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
+
     }
 
     @GetMapping("/{id}")
     public Response<ProductVO> getProduct(@PathVariable Integer id) {
-        return Response.buildSuccess(productService.getProduct(id));
+        try{
+            return Response.buildSuccess(productService.getProduct(id));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
+        
     }
 }
 

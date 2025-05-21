@@ -41,7 +41,7 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    public Boolean removeCartItem(Integer productId) throws Exception {
+    public Boolean removeCartItem(Integer productId){
         Integer userId = securityUtil.getCurrentAccount().getId();
         CartItem cartItem = cartItemRepository.findCartItemByUserIdAndProductId(userId, productId);
         if (cartItem != null) {
@@ -55,7 +55,7 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     @Transactional
-    public Boolean updateCartItem(Integer productId, Integer newQuantity) throws Exception {
+    public Boolean updateCartItem(Integer productId, Integer newQuantity){
         Integer userId = securityUtil.getCurrentAccount().getId();
         CartItem cartItem = cartItemRepository.findCartItemByUserIdAndProductId(userId, productId);
         if (cartItem != null) {

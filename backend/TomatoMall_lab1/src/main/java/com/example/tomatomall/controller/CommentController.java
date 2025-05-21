@@ -1,5 +1,6 @@
 package com.example.tomatomall.controller;
 
+import com.example.tomatomall.exception.TomatoMallException;
 import com.example.tomatomall.service.CommentService;
 import com.example.tomatomall.vo.CommentVO;
 import com.example.tomatomall.vo.Response;
@@ -16,16 +17,29 @@ public class CommentController {
 
     @PostMapping
     public Response<Boolean> createComment(@RequestBody CommentVO commentVO, @RequestParam Integer accountId) {
-        return Response.buildSuccess(commentService.createComment(commentVO, accountId));
+        try{
+            return Response.buildSuccess(commentService.createComment(commentVO, accountId));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
+
     }
 
     @GetMapping("/{postId}")
     public Response<List<CommentVO>> getPostComment(@PathVariable Integer postId) {
-        return Response.buildSuccess(commentService.getPostComments(postId));
+        try{
+            return Response.buildSuccess(commentService.getPostComments(postId));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
     }
 
     @PostMapping("/delete/{commentId}")
     public Response<Boolean> deletePost(@PathVariable Integer commentId) {
-        return Response.buildSuccess(commentService.deleteComment(commentId));
+        try{
+            return Response.buildSuccess(commentService.deleteComment(commentId));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
     }
 }

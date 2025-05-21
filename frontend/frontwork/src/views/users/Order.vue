@@ -3,7 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Location, CreditCard, Picture } from '@element-plus/icons-vue'
-import { createOrderDirectly, getOrder, deleteOrder, deleteOrderDirectly,updateOrderStatus } from '../../api/order'
+import { createOrderDirectly, getOrder, deleteOrder, deleteOrderDirectly,updateOrderStatus } from '../../api/orders'
 import { createAlipay } from '../../api/payments'
 import { getProduct } from "../../api/products";
 import { getCartItem,removeCartItemById } from "../../api/cartItem";

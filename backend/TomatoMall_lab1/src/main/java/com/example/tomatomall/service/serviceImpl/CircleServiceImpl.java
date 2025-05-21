@@ -5,15 +5,20 @@ import com.example.tomatomall.exception.TomatoMallException;
 import com.example.tomatomall.po.Circle;
 import com.example.tomatomall.po.CircleMember;
 import com.example.tomatomall.po.Post;
+import com.example.tomatomall.repository.AccountRepository;
 import com.example.tomatomall.repository.CircleMemberRepository;
 import com.example.tomatomall.repository.CircleRepository;
 import com.example.tomatomall.repository.PostRepository;
+import com.example.tomatomall.service.AccountService;
 import com.example.tomatomall.service.CircleService;
 import com.example.tomatomall.service.PostService;
+import com.example.tomatomall.util.SecurityUtil;
+import com.example.tomatomall.vo.AccountVO;
 import com.example.tomatomall.vo.CircleVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +35,12 @@ public class CircleServiceImpl implements CircleService {
 
     @Autowired
     PostRepository postRepository;
+
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    SecurityUtil securityUtil;
 
     @Override
     public Boolean createCircle(CircleVO circleVO) {
@@ -102,4 +113,108 @@ public class CircleServiceImpl implements CircleService {
         circleRepository.delete(circle);
         return true;
     }
+
+    @Override
+    public CircleEnum getRole(Integer circleId) {
+        Circle circle = circleRepository.findById(circleId).isPresent() ? circleRepository.findById(circleId).get() : null;
+        if(circle == null) {
+            throw TomatoMallException.circleNotExist();
+        }
+        Integer userId = securityUtil.getCurrentAccount().getId();
+        CircleEnum role = null;
+        if(circleMemberRepository.findByCircleIdAndAccountId(circle.getCircleId(),userId).isPresent()){
+            role = circleMemberRepository.findByCircleIdAndAccountId(circle.getCircleId(),userId).get().getCircleRole();
+        }else{
+            role  = CircleEnum.VISITOR;
+        }
+        return role;
+    }
+
+    @Override
+    public Boolean promoteToAdmin(Integer circleId, Integer accountId){
+        if(!circleMemberRepository.existsByCircleIdAndAccountId(circleId, accountId)) {
+            throw TomatoMallException.userNotInCircle();
+        }
+
+        Integer operatorId = securityUtil.getCurrentAccount().getId();
+        if(!circleMemberRepository.existsByCircleIdAndAccountId(circleId, operatorId)) {
+            throw TomatoMallException.operatorNotInCircle();
+        }
+
+        if(circleMemberRepository.findByCircleIdAndAccountId(circleId, operatorId).get().getCircleRole() != CircleEnum.OWNER) {
+            throw TomatoMallException.noAuthority();
+        }
+
+        CircleMember cm = circleMemberRepository.findByCircleIdAndAccountId(circleId,accountId).get();
+        cm.setCircleRole(CircleEnum.ADMIN);
+        circleMemberRepository.save(cm);
+
+        return true;
+    }
+
+    @Override
+    public Boolean demoteAdmin(Integer circleId, Integer accountId){
+        if(!circleMemberRepository.existsByCircleIdAndAccountId(circleId, accountId)) {
+            throw TomatoMallException.userNotInCircle();
+        }
+
+        Integer operatorId = securityUtil.getCurrentAccount().getId();
+        if(!circleMemberRepository.existsByCircleIdAndAccountId(circleId, operatorId)) {
+            throw TomatoMallException.operatorNotInCircle();
+        }
+
+        if(circleMemberRepository.findByCircleIdAndAccountId(circleId, operatorId).get().getCircleRole() != CircleEnum.OWNER) {
+            throw TomatoMallException.noAuthority();
+        }
+
+        if(circleMemberRepository.findByCircleIdAndAccountId(circleId, accountId).get().getCircleRole() != CircleEnum.ADMIN) {
+            throw TomatoMallException.isNotAdmin();
+        }
+
+        CircleMember cm = circleMemberRepository.findByCircleIdAndAccountId(circleId,accountId).get();
+        cm.setCircleRole(CircleEnum.MEMBER);
+        circleMemberRepository.save(cm);
+
+        return true;
+    }
+
+    @Override
+    public List<AccountVO> getAdmins(Integer circleId){
+        List<AccountVO> admins = new ArrayList<>();
+        List<CircleMember> circleMembers = circleMemberRepository.findByCircleId(circleId);
+        for(CircleMember circleMember : circleMembers) {
+            if(circleMember.getCircleRole() == CircleEnum.ADMIN) {
+                admins.add(accountRepository.findById(circleMember.getAccountId()).get().toVO());
+            }
+        }
+
+        return admins;
+    }
+
+
+    @Override
+    public List<AccountVO> getAllMembers(Integer circleId){
+        List<AccountVO> members = new ArrayList<>();
+        List<CircleMember> circleMembers = circleMemberRepository.findByCircleId(circleId);
+        for(CircleMember circleMember : circleMembers) {
+            if(circleMember.getCircleRole() == CircleEnum.MEMBER) {
+                members.add(accountRepository.findById(circleMember.getAccountId()).get().toVO());
+            }
+        }
+
+        return members;
+    }
+
+    @Override
+    public AccountVO getOwner(Integer circleId){
+        List<CircleMember> circleMembers = circleMemberRepository.findByCircleId(circleId);
+        for(CircleMember circleMember : circleMembers) {
+            if(circleMember.getCircleRole() == CircleEnum.OWNER) {
+                return accountRepository.findById(circleMember.getAccountId()).get().toVO();
+            }
+        }
+
+        return null;
+    }
+
 }

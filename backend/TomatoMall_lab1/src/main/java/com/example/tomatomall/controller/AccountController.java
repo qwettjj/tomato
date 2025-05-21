@@ -1,5 +1,6 @@
 package com.example.tomatomall.controller;
 
+import com.example.tomatomall.exception.TomatoMallException;
 import com.example.tomatomall.service.AccountService;
 import com.example.tomatomall.vo.AccountVO;
 import com.example.tomatomall.vo.Response;
@@ -19,7 +20,12 @@ public class AccountController {
      */
     @GetMapping("/info")
     public Response<AccountVO> getUser() {
-        return Response.buildSuccess(accountService.getAccount());
+        try{
+            return Response.buildSuccess(accountService.getAccount());
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
+
     }
 
     /**
@@ -27,7 +33,12 @@ public class AccountController {
      */
     @PostMapping("/create")
     public Response<Boolean> createUser(@RequestBody AccountVO accountVO) {
-        return Response.buildSuccess(accountService.register(accountVO));
+        try{
+            return Response.buildSuccess(accountService.register(accountVO));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
+
     }
 
     /**
@@ -35,7 +46,11 @@ public class AccountController {
      */
     @PutMapping("/update")
     public Response<Boolean> updateUser(@RequestBody AccountVO accountVO) {
-        return Response.buildSuccess(accountService.updateAccount(accountVO));
+        try{
+            return Response.buildSuccess(accountService.updateAccount(accountVO));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
     }
 
     /**
@@ -43,6 +58,10 @@ public class AccountController {
      */
     @PostMapping("/login")
     public Response<String> login(@RequestParam("phone") String phone, @RequestParam("password") String password) {
-        return Response.buildSuccess(accountService.login(phone, password));
+        try{
+            return Response.buildSuccess(accountService.login(phone, password));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"200");
+        }
     }
 }

@@ -135,7 +135,7 @@ import { Picture } from '@element-plus/icons-vue'
 import { getProduct } from '../../api/products'
 import type { ProductVO } from '../../api/products'
 import { addCartItem } from "../../api/cartItem";
-import { createOrderDirectly} from "../../api/order";
+import { createOrderDirectly} from "../../api/orders";
 
 
 // 路由相关

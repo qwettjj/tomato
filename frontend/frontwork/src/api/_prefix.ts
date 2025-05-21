@@ -18,3 +18,12 @@ export const PAYMENT_MODULE = `${API_MODULE}/alipay`
 
 //广告模块
 export const ADVERTISEMENT_MODULE = `${API_MODULE}/advertisements`
+
+//书友圈模块
+export const CIRCLE_MODULE = `${API_MODULE}/circles`
+
+//书友圈帖子模块
+export const POST_MODULE = `${API_MODULE}/posts`
+
+//书友圈评论模块
+export const COMMENT_MODULE = `${API_MODULE}/comments`
