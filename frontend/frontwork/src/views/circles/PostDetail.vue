@@ -13,14 +13,7 @@
           👁️ {{ post.viewCount }} 赞 {{ post.likeCount }}  💬 {{ post.commentCount }}
         </span>
       </div>
-      <div class="post-content">{{ post.content }}</div>
-      <button
-          class="like-button"
-          :class="{ 'liked': isLiked }"
-          @click="handleLike"
-      >
-        {{ isLiked ? '已赞' : '点赞' }}
-      </button>
+      <div class="post-content">详情：{{ post.content }}</div>
     </div>
 
     <!-- 评论输入框 -->
@@ -30,24 +23,34 @@
           placeholder="写下你的评论..."
           @keydown.enter.exact.prevent="submitComment"
       ></textarea>
-      <button @click="submitComment">发布</button>
+      <div class="action-buttons">
+        <button @click="submitComment">发布</button>
+        <button
+            class="like-button"
+            :class="{ 'liked': isLiked }"
+            @click="handleLike"
+        >
+          {{ isLiked ? '已赞' : '点赞' }}
+        </button>
+      </div>
     </div>
 
     <!-- 评论列表 -->
     <div class="comments">
-      <CommentItem
-          v-for="comment in comments"
-          :key="comment.commentId"
-          :comment="comment"
-          :depth="0"
-          @reply="handleReply"
-      />
+      <div v-for="(comment, index) in comments" :key="comment.commentId" class="comment-item">
+        <div class="comment-floor">{{ getFloorText(index) }}</div>
+        <CommentItem
+            :comment="comment"
+            :depth="0"
+            @reply="handleReply"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   getPostDetail,
@@ -76,6 +79,12 @@ const isLiked = ref(false)
 const comments = ref<CommentVO[]>([])
 const newComment = ref('')
 const replyingTo = ref<number | null>(null)
+
+// 获取楼层文字
+const getFloorText = (index: number) => {
+  const floorNumber = index + 1
+  return `${floorNumber}楼`
+}
 
 // 获取帖子详情
 const fetchPostDetail = async () => {
@@ -141,9 +150,9 @@ onMounted(async () => {
 
 <style scoped>
 .post-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 1200px;
+  margin: 20px 50px;
+  padding: 0 20px;
 }
 
 .post-title {
@@ -169,19 +178,8 @@ onMounted(async () => {
 .post-content {
   line-height: 1.6;
   margin-bottom: 20px;
-}
-
-.like-button {
-  padding: 8px 16px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.like-button.liked {
-  background: #409eff;
-  color: white;
+  text-align: left;
+  padding-left: 0;
 }
 
 .comment-input {
@@ -197,6 +195,25 @@ onMounted(async () => {
   border-radius: 4px;
 }
 
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.like-button {
+  padding: 8px 16px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.like-button.liked {
+  background: #409eff;
+  color: white;
+}
+
 .comment-input button {
   padding: 8px 16px;
   background: #409eff;
@@ -204,5 +221,22 @@ onMounted(async () => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.comments {
+  margin-top: 30px;
+}
+
+.comment-item {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  text-align: left;
+}
+
+.comment-floor {
+  font-weight: bold;
+  color: #409eff;
+  margin-bottom: 5px;
 }
 </style>

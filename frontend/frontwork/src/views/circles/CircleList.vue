@@ -116,6 +116,11 @@ const handleDelete = async (circleId: number) => {
   }
 }
 
+// 跳转到圈子详情
+const navigateToCircle = (circleId: number) => {
+  router.push(`/home/circles/${circleId}`)
+}
+
 // 初始化加载
 onMounted(() => {
   console.log("当前用户Id : " + userId);
@@ -144,44 +149,35 @@ onMounted(() => {
     </div>
 
     <!-- 圈子列表 -->
-    <el-row :gutter="20" class="list-container">
-      <el-col
+    <div class="horizontal-list-container">
+      <div
           v-for="circle in circles"
           :key="circle.id"
-          :xs="24"
-          :sm="12"
-          :md="8"
+          class="horizontal-circle-item"
+          @click="navigateToCircle(circle.id)"
       >
-        <el-card class="circle-card">
-          <template #header>
-            <div class="card-header">
-              <router-link
-                  :to="`/home/circles/${circle.id}`"
-                  class="circle-title"
-              >
-                {{ circle.title }}
-              </router-link>
-              <el-button
-                  v-if="circle.creatorId === userId"
-                  type="danger"
-                  size="small"
-                  @click="handleDelete(circle.id)"
-              >
-                删除
-              </el-button>
+        <div class="item-content">
+          <el-image :src="circle.cover" fit="cover" class="horizontal-cover-image" />
+          <div class="item-info">
+            <div class="item-title">{{ circle.title }}</div>
+            <div class="item-description">{{ circle.description }}</div>
+            <div class="item-meta">
+              <el-tag>成员 {{ circle.memberCount }}</el-tag>
+              <el-tag type="success">帖子 {{ circle.postCount }}</el-tag>
             </div>
-          </template>
-
-          <el-image :src="circle.cover" fit="cover" class="cover-image" />
-          <p class="description">{{ circle.description }}</p>
-          <div class="meta-info">
-            <el-tag>成员 {{ circle.memberCount }}</el-tag>
-            <el-tag type="success">帖子 {{ circle.postCount }}</el-tag>
-<!--            <el-tag> {{ circle.creatorId }}</el-tag>-->
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
+          <el-button
+              v-if="circle.creatorId === userId"
+              type="danger"
+              size="small"
+              class="delete-btn"
+              @click.stop="handleDelete(circle.id)"
+          >
+            删除
+          </el-button>
+        </div>
+      </div>
+    </div>
 
     <!-- 创建对话框 -->
     <el-dialog v-model="showCreateDialog" title="创建新圈子">
@@ -226,7 +222,6 @@ onMounted(() => {
             </template>
           </el-upload>
         </el-form-item>
-
       </el-form>
       <template #footer>
         <el-button @click="showCreateDialog = false">取消</el-button>
@@ -239,7 +234,7 @@ onMounted(() => {
 <style scoped>
 .circle-list-container {
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 20px 50px;
   padding: 0 20px;
 }
 
@@ -249,43 +244,75 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-.circle-card {
-  margin-bottom: 20px;
-  transition: transform 0.2s;
+.horizontal-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.circle-card:hover {
-  transform: translateY(-5px);
+.horizontal-circle-item {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  cursor: pointer;
 }
 
-.cover-image {
-  width: 100%;
-  height: 200px;
+.horizontal-circle-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.15);
+}
+
+.item-content {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 16px;
+}
+
+.horizontal-cover-image {
+  width: 120px;
+  height: 80px;
   border-radius: 4px;
+  object-fit: cover;
 }
 
-.description {
-  margin: 10px 0;
-  color: #666;
-  height: 60px;
+.item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--el-color-primary);
+  margin-bottom: 8px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.meta-info {
-  display: flex;
-  justify-content: space-between;
-  color: #999;
+.item-description {
+  color: #666;
   font-size: 0.9em;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.circle-title {
-  font-size: 1.2em;
-  font-weight: bold;
-  color: var(--el-color-primary);
-  text-decoration: none;
+.item-meta {
+  display: flex;
+  gap: 8px;
 }
 
+.delete-btn {
+  margin-left: auto;
+}
+
+/* 以下样式保持不变 */
 .upload-area {
   position: relative;
   width: 150px;
@@ -339,5 +366,4 @@ onMounted(() => {
   color: #909399;
   margin-top: 8px;
 }
-
 </style>

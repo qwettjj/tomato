@@ -44,7 +44,7 @@ const posts = ref<PostInfo[]>([])
 const admins = ref<AccountVO[]>([])
 const members = ref<AccountVO[]>([])
 const owner = ref<AccountVO | null>(null)
-const likedPostIds = ref<Set<number>>(new Set()) // 使用Set存储点赞帖子ID
+const likedPostIds = ref<Set<number>>(new Set())
 
 // 发布相关状态
 const showCreatePostDialog = ref(false)
@@ -54,12 +54,10 @@ const newPost = ref({
   circleId: circleId.value
 })
 
-
 // 加载数据
 const loadData = async () => {
   const loading = ElLoading.service({ fullscreen: true })
   try {
-    // 加载基本数据
     const [roleRes, detailRes, postsRes, adminsRes, membersRes, ownerRes] = await Promise.all([
       getCircleRole(circleId.value),
       getCircleDetails(circleId.value),
@@ -69,22 +67,18 @@ const loadData = async () => {
       getCircleOwner(circleId.value)
     ])
 
-    // 加载点赞数据
     const likedRes = await getLikedPosts()
     likedPostIds.value = new Set(likedRes.map(post => post.postId))
 
-    // 处理角色和基础数据
     currentUserRole.value = roleRes.data || 'VISITOR'
     circleInfo.value = detailRes.data
     admins.value = adminsRes.data
     members.value = membersRes.filter(m => m.id !== ownerRes?.id)
     owner.value = ownerRes.data
 
-    // 处理帖子数据（合并点赞状态）
     posts.value = postsRes.map(post => ({
       ...post,
       createTime: new Date(post.createTime).toLocaleString(),
-      // 添加计算属性
       isLiked: likedPostIds.value.has(post.postId)
     }))
 
@@ -160,30 +154,22 @@ const handleCreatePost = async () => {
 // 点赞/取消点赞
 const toggleLike = async (post: PostInfo) => {
   try {
-    // 创建临时Set确保响应式更新
     const tempLiked = new Set(likedPostIds.value)
     const originalLikeCount = post.likeCount
-    let apiSuccess = false
 
     if (tempLiked.has(post.postId)) {
-      // 取消点赞流程
       tempLiked.delete(post.postId)
       post.likeCount--
       likedPostIds.value = tempLiked
       await unlikePost(post.postId)
     } else {
-      // 点赞流程
       tempLiked.add(post.postId)
       post.likeCount++
       likedPostIds.value = tempLiked
       await likePost(post.postId)
     }
 
-    // 标记操作成功
-    apiSuccess = true
-
   } catch (error) {
-    // 失败时回滚状态
     const tempLiked = new Set(likedPostIds.value)
     if (tempLiked.has(post.postId)) {
       tempLiked.delete(post.postId)
@@ -195,11 +181,9 @@ const toggleLike = async (post: PostInfo) => {
     likedPostIds.value = tempLiked
     ElMessage.error('操作失败，请稍后重试')
   } finally {
-    // 无论成功与否都更新isLiked状态
     post.isLiked = likedPostIds.value.has(post.postId)
   }
 }
-
 
 // 删除帖子
 const handleDeletePost = async (postId: number) => {
@@ -219,7 +203,6 @@ const handleDeletePost = async (postId: number) => {
 }
 
 // 权限检查
-// 权限检查方法
 const canDeletePost = (post: PostInfo) => {
   return currentUserRole.value === 'OWNER' ||
       currentUserRole.value === 'ADMIN' ||
@@ -323,6 +306,22 @@ onMounted(() => {
           </el-button>
         </div>
       </el-alert>
+    </div>
+
+    <!-- 帖子详情部分 -->
+    <div v-if="posts.length > 0" class="post-detail">
+      <h1 class="post-title">{{ posts[0].title }}</h1>
+      <div class="post-meta">
+        <span class="author">
+          <img :src="owner?.avatar || 'default-avatar.png'" class="avatar" />
+          {{ owner?.userName }}
+        </span>
+        <span class="time">{{ posts[0].createTime }}</span>
+        <span class="stats">
+          👁️ {{ posts[0].viewCount }} 赞 {{ posts[0].likeCount }}  💬 {{ posts[0].commentCount }}
+        </span>
+      </div>
+      <div class="post-content">详情：{{ posts[0].content }}</div>
     </div>
 
     <!-- 发帖控制栏 -->
@@ -479,7 +478,7 @@ onMounted(() => {
 <style scoped>
 .circle-detail-container {
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 20px 50px;
   padding: 0 20px;
 }
 
@@ -511,6 +510,7 @@ onMounted(() => {
   font-size: 2em;
   color: #303133;
   line-height: 1.2;
+  text-align: left;
 }
 
 .description {
@@ -518,6 +518,7 @@ onMounted(() => {
   margin-bottom: 20px;
   line-height: 1.7;
   white-space: pre-wrap;
+  text-align: left;
 }
 
 .stats {
@@ -525,12 +526,55 @@ onMounted(() => {
   gap: 10px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .actions {
   margin-top: 15px;
   display: flex;
   gap: 10px;
+  justify-content: flex-start;
+}
+
+/* 帖子详情部分 */
+.post-detail {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.post-title {
+  font-size: 1.5em;
+  margin-bottom: 15px;
+  color: #303133;
+  text-align: left;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  color: #666;
+  justify-content: flex-start;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.post-content {
+  line-height: 1.6;
+  color: #606266;
+  white-space: pre-wrap;
+  text-align: left;
+  padding-left: 0;
 }
 
 /* 访客提示 */
@@ -556,6 +600,7 @@ onMounted(() => {
   padding: 15px 20px;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  text-align: left;
 }
 
 /* 帖子列表样式 */
@@ -605,21 +650,12 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.post-content {
-  color: #606266;
-  line-height: 1.6;
-  margin: 10px 0;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
-}
-
 .post-meta {
   display: flex;
   gap: 10px;
   margin-top: 15px;
   flex-wrap: wrap;
+  justify-content: flex-start;
 }
 
 .like-tag {
@@ -647,6 +683,7 @@ onMounted(() => {
   border-bottom: 1px solid #ebeef5;
   padding-bottom: 10px;
   margin-bottom: 15px;
+  text-align: left;
 }
 
 .owner-info {
@@ -656,6 +693,7 @@ onMounted(() => {
   padding: 15px;
   background: #f8f9fa;
   border-radius: 8px;
+  text-align: left;
 }
 
 .owner-detail {
@@ -673,6 +711,7 @@ onMounted(() => {
   background: #f8f9fa;
   border-radius: 6px;
   transition: background 0.2s;
+  text-align: left;
 }
 
 .member-item:hover {
