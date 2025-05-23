@@ -5,7 +5,7 @@ import com.example.tomatomall.vo.CommentVO;
 import java.util.List;
 
 public interface CommentService {
-    Boolean createComment(CommentVO commentVO, Integer accountId);
+    Boolean createComment(CommentVO commentVO);
     List<CommentVO> getPostComments(Integer postId);
     Boolean deleteComment(Integer commentId);
 }

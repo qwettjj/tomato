@@ -73,7 +73,7 @@ public class AccountServiceImpl implements AccountService {
             account.setPassword(newPassword);
         }
         if(accountVO.getUserName()!=null) {
-            account.setUserName(accountVO.getUserName());//这是66行
+            account.setUserName(accountVO.getUserName());
         }
         if(accountVO.getAddress()!=null) {
             account.setAddress(accountVO.getAddress());
@@ -88,6 +88,15 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountVO getAccount() {
         Account account = securityUtil.getCurrentAccount();
+        return account.toVO();
+    }
+
+    @Override
+    public AccountVO getAccountById(Integer id){
+        Account account = accountRepository.findById(id).isPresent() ? accountRepository.findById(id).get() : null;
+        if(account == null) {
+            throw TomatoMallException.accountNotFound();
+        }
         return account.toVO();
     }
 }

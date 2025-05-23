@@ -25,7 +25,7 @@ export const getPostDetail = (postId: number) => {
 
 export const getCirclePosts = (circleId: number) => {
     return axios.get(`${POST_MODULE}/circle/${circleId}`)
-        .then(res => res.data);
+        .then(res => res.data.data);
 };
 
 export const likePost = (postId: number) => {
@@ -42,3 +42,13 @@ export const deletePost = (postId: number) => {
     return axios.post(`${POST_MODULE}/delete/${postId}`)
         .then(res => res.data);
 };
+
+export const judgeLiked = (postId: number) => {
+    return axios.get(`${POST_MODULE}/judgeLiked/${postId}`)
+        .then(res => res.data);
+}
+
+export const getLikedPosts = () => {
+    return axios.get(`${POST_MODULE}/getLiked`)
+        .then(res => res.data.data);
+}

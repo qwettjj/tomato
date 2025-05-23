@@ -46,9 +46,12 @@ public class Comment {
 
     public CommentVO toVO(){
         CommentVO commentVO = new CommentVO();
-        commentVO.setContent(this.content);
-        commentVO.setParentId(this.parentId);
-        commentVO.setContent(this.content);
+        commentVO.setCommentId(commentId);
+        commentVO.setPostId(postId);
+        commentVO.setAccountId(accountId);
+        commentVO.setContent(content);
+        commentVO.setParentId(parentId);
+        commentVO.setCreateTime(createTime);
         return commentVO;
     }
 }

@@ -114,6 +114,31 @@ const router = createRouter({
             ]
         },
         {
+            path: '/home',
+            redirect: '/circles',
+            component: () => import('../views/Home.vue'),
+            children: [
+                {
+                    path: '/home/circles',
+                    name: 'AllCircles',
+                    component: () => import('../views/circles/CircleList.vue'),
+                    meta: {title: '书友圈'},
+                },
+                {
+                    path: '/home/circles/:circleId',
+                    name: 'CircleDetail',
+                    component: () => import('../views/circles/CircleDetail.vue'),
+                    meta: {title : '书友圈详情'},
+                },
+                {
+                    path: '/home/circles/posts/:postId',
+                    name : 'PostDetail',
+                    component: () => import('../views/circles/PostDetail.vue'),
+                    meta: {title : '评论详情'},
+                }
+            ]
+        },
+        {
             path: '/404',
             component: () => import('../views/NotFound.vue'),
             meta: { title: '404' }

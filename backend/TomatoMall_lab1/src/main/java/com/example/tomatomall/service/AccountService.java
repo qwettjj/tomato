@@ -10,4 +10,6 @@ public interface AccountService {
     AccountVO getAccount();
 
     Boolean updateAccount(AccountVO accountVO);
+
+    AccountVO getAccountById(Integer id);
 }

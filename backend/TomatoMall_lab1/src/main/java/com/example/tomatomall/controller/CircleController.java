@@ -24,7 +24,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.createCircle(circleVO));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
 
     }
@@ -34,7 +34,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.searchCircle(keyword));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -43,7 +43,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.joinCircle(circleId, accountId, CircleEnum.MEMBER));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -52,7 +52,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.leaveCircle(circleId, accountId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -61,7 +61,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.deleteCircle(circleId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -70,7 +70,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.getAccountCircle(accountId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -79,7 +79,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.getRole(circleId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -88,7 +88,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.promoteToAdmin(circleId, accountId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -97,7 +97,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.demoteAdmin(circleId, accountId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -106,7 +106,7 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.getAdmins(circleId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -115,7 +115,7 @@ public class CircleController {
         try{
             return Response.buildSuccess( circleService.getAllMembers(circleId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -124,7 +124,25 @@ public class CircleController {
         try{
             return Response.buildSuccess(circleService.getOwner(circleId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
+        }
+    }
+
+    @GetMapping()
+    public Response<List<CircleVO>> getCircles() {
+        try{
+            return Response.buildSuccess(circleService.getCircles());
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"400");
+        }
+    }
+
+    @GetMapping("/{circleId}")
+    public Response<CircleVO> getCircleDetail(@PathVariable Integer circleId) {
+        try{
+            return Response.buildSuccess(circleService.getCircle(circleId));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 }

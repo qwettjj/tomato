@@ -20,9 +20,9 @@ public class Circle {
     @Column(name = "circle_id")
     private Integer circleId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)//如果不和商品联系起来可以删掉
-    private Product product;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "product_id", nullable = false)//如果不和商品联系起来可以删掉
+//    private Product product;
 
     @JoinColumn(name = "creator_id",nullable = false)
     private Integer creatorId;
@@ -69,6 +69,7 @@ public class Circle {
 
     public CircleVO toVO(){
         CircleVO vo = new CircleVO();
+        vo.setId(this.circleId);
         vo.setCover(this.cover);
         vo.setDescription(this.description);
         vo.setStatus(this.status);

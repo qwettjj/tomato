@@ -31,7 +31,7 @@ public class PostVO {
 
     public Post toPO(){
         Post post = new Post();
-        post.setId(this.postId);
+        post.setPostId(this.postId);
         post.setAccountId(this.accountId);
         post.setCircleId(this.circleId);
         post.setCreateTime(this.createTime);

@@ -3,6 +3,7 @@ import { CIRCLE_MODULE } from './_prefix'
 
 // 定义类型
 export type CircleVO = {
+    id : number;
     title: string;
     description: string;
     cover: string;
@@ -77,11 +78,23 @@ export const getCircleAdmins = (circleId: number) => {
 // 获取圈子所有成员
 export const getAllCircleMembers = (circleId: number) => {
     return axios.get(`${CIRCLE_MODULE}/${circleId}/getAllMembers`)
-        .then(res => res.data)
+        .then(res => res.data.data)
 }
 
 // 获取圈子拥有者
 export const getCircleOwner = (circleId: number) => {
     return axios.get(`${CIRCLE_MODULE}/${circleId}/getOwner`)
+        .then(res => res.data)
+}
+
+//获取所有圈子
+export const getCircles = () => {
+    return axios.get(`${CIRCLE_MODULE}`)
+        .then(res => res.data)
+}
+
+//获取一个圈子
+export const getCircleDetails = (circleId: number) => {
+    return axios.get(`${CIRCLE_MODULE}/${circleId}`)
         .then(res => res.data)
 }

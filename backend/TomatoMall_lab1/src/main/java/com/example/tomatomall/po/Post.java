@@ -18,14 +18,14 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
-    private Integer id;
+    private Integer postId;
 
     @Basic
     @Column(name = "circle_id")
     private Integer circleId;
 
     @Basic
-    @Column(name = "account _id")
+    @Column(name = "account_id")
     private Integer accountId;
 
     @Basic
@@ -64,7 +64,7 @@ public class Post {
 
     public PostVO toVO(){
         PostVO postVO = new PostVO();
-        postVO.setPostId(this.id);
+        postVO.setPostId(this.postId);
         postVO.setCircleId(this.circleId);
         postVO.setAccountId(this.accountId);
         postVO.setTitle(this.title);

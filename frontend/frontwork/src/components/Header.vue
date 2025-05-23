@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import {router} from '../router'
 import {parseRole} from "../utils"
-import {User, SwitchButton, ShoppingCart} from "@element-plus/icons-vue"   // 添加了ShoppingCart图标
+import {User, SwitchButton, ShoppingCart} from "@element-plus/icons-vue"
 import { ElMessageBox } from 'element-plus'
-const role = sessionStorage.getItem('role')    //登录的时候插入的
+import { useRouter } from 'vue-router'
 
-//退出登录
+const role = sessionStorage.getItem('role')
+const router = useRouter()
+
+// 退出登录
 function logout() {
   ElMessageBox.confirm(
       '是否要退出登录？',
@@ -24,8 +26,12 @@ function logout() {
     router.push({path: "/login"})
   })
 }
-</script>
 
+// 跳转到书友圈
+function toCircles() {
+  router.push({path:"/home/circles"})
+}
+</script>
 
 <template>
   <el-header class="custom-header" height="20">
@@ -41,14 +47,21 @@ function logout() {
         <el-tag class="role-tag" size="large">{{ parseRole(role) }}版</el-tag>
       </el-col>
 
-      <el-col :span="12">
+      <el-col :span="10"> <!-- 从12调整为10 -->
       </el-col>
 
-      <!-- 添加购物车链接 -->
+      <!-- 购物车链接 -->
       <el-col :span="2" class="header-icon">
         <router-link to="/home/cart" v-slot="{ navigate }" class="header-link">
           <span @click="navigate" class="header-text">购物车</span>
         </router-link>
+      </el-col>
+
+      <!-- 新增书友圈按钮 -->
+      <el-col :span="2" class="header-icon">
+        <a @click="toCircles" class="header-link">
+          <span class="header-text">书友圈</span>
+        </a>
       </el-col>
 
       <el-col :span="2" class="header-icon">
@@ -72,13 +85,11 @@ function logout() {
   </el-header>
 </template>
 
-
 <style scoped>
 .custom-header {
   background-color: #FF6347;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
-
   display: flex;
   flex-direction: column;
 }
@@ -106,7 +117,9 @@ function logout() {
   align-items:center;
   justify-content: center;
 }
+
 .header-link {
-  text-decoration: none !important; /* 去掉下划线 */
+  text-decoration: none !important;
+  cursor: pointer;
 }
 </style>

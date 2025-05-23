@@ -47,6 +47,7 @@ public class CircleServiceImpl implements CircleService {
         Circle circle = circleVO.toPO();
         circle.setStatus(1);
         circle.setMemberCount(0);
+        circle.setCreatorId(securityUtil.getCurrentAccount().getId());
         Circle savedCircle = circleRepository.save(circle);
 
         if(joinCircle(savedCircle.getCircleId(), savedCircle.getCreatorId(), CircleEnum.OWNER)) {
@@ -108,7 +109,7 @@ public class CircleServiceImpl implements CircleService {
             throw TomatoMallException.circleNotExist();
         }
         for(Post post: postRepository.findByCircleId(circleId)) {
-            postService.deletePost(post.getId());
+            postService.deletePost(post.getPostId());
         }
         circleRepository.delete(circle);
         return true;
@@ -217,4 +218,24 @@ public class CircleServiceImpl implements CircleService {
         return null;
     }
 
+    @Override
+    public List<CircleVO> getCircles(){
+        List<Circle> circles = circleRepository.findAll();
+        List<CircleVO> circleVOs = new ArrayList<>();
+        for(Circle circle : circles) {
+            circleVOs.add(circle.toVO());
+        }
+
+        return circleVOs;
+    }
+
+    @Override
+    public CircleVO getCircle(Integer circleId){
+        if(circleRepository.existsById(circleId)) {
+            return circleRepository.findById(circleId).get().toVO();
+        }
+        else{
+            throw TomatoMallException.circleNotExist();
+        }
+    }
 }

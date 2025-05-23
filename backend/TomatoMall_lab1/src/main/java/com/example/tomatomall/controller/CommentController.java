@@ -16,11 +16,11 @@ public class CommentController {
     private CommentService commentService;
 
     @PostMapping
-    public Response<Boolean> createComment(@RequestBody CommentVO commentVO, @RequestParam Integer accountId) {
+    public Response<Boolean> createComment(@RequestBody CommentVO commentVO) {
         try{
-            return Response.buildSuccess(commentService.createComment(commentVO, accountId));
+            return Response.buildSuccess(commentService.createComment(commentVO));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
 
     }
@@ -30,7 +30,7 @@ public class CommentController {
         try{
             return Response.buildSuccess(commentService.getPostComments(postId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -39,7 +39,7 @@ public class CommentController {
         try{
             return Response.buildSuccess(commentService.deleteComment(commentId));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 }

@@ -23,6 +23,18 @@ type UpdateInfo = {
     avatar?: string
 }
 
+type accountVO = {
+    id : number,
+    userName: string,
+    password: string,
+    phone: string,
+    email: string,
+    address: string,
+    role: string,
+    createTime: string,
+    avatar?: string
+}
+
 // 登录接口
 export const userLogin = (loginInfo: LoginInfo) => {
     return axios.post(`${ACCOUNTS_MODULE}/login`, null, {params:loginInfo })
@@ -59,3 +71,11 @@ export const userInfo = (token:string) => {
             return res.data
         })
 }
+
+export const getUserInfo = (id : number) => {
+    return axios.get(`${ACCOUNTS_MODULE}/getUserInfo/${id}`,{
+    }).then(res => {
+        return res.data
+    })
+}
+

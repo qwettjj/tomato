@@ -21,7 +21,7 @@ public class ProductController {
         try{
             return Response.buildSuccess(productService.addProduct(productVO));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
 
     }
@@ -31,7 +31,7 @@ public class ProductController {
         try{
             return Response.buildSuccess(productService.updateProduct(productVO));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
 
     }
@@ -41,7 +41,7 @@ public class ProductController {
         try{
             return Response.buildSuccess(productService.deleteProduct(id));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -50,7 +50,7 @@ public class ProductController {
         try{
             return Response.buildSuccess(productService.getAllProducts());
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
 
     }
@@ -60,10 +60,11 @@ public class ProductController {
         try{
             return Response.buildSuccess(productService.getProduct(id));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
-        
     }
+
+
 }
 
 

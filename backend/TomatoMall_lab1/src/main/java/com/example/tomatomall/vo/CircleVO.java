@@ -9,6 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CircleVO {
+    private Integer id;
+
     private String title;
 
     private String description;
@@ -21,6 +23,7 @@ public class CircleVO {
 
     public Circle toPO(){
         Circle circle = new Circle();
+        circle.setCircleId(this.id);
         circle.setTitle(this.title);
         circle.setDescription(this.description);
         circle.setCover(this.cover);

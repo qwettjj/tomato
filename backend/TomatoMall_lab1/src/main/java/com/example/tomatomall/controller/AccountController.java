@@ -23,7 +23,7 @@ public class AccountController {
         try{
             return Response.buildSuccess(accountService.getAccount());
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
 
     }
@@ -36,7 +36,7 @@ public class AccountController {
         try{
             return Response.buildSuccess(accountService.register(accountVO));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
 
     }
@@ -49,7 +49,7 @@ public class AccountController {
         try{
             return Response.buildSuccess(accountService.updateAccount(accountVO));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
@@ -61,7 +61,16 @@ public class AccountController {
         try{
             return Response.buildSuccess(accountService.login(phone, password));
         }catch (TomatoMallException e){
-            return Response.buildFailure(e.getMessage(),"200");
+            return Response.buildFailure(e.getMessage(),"400");
+        }
+    }
+
+    @GetMapping("/getUserInfo/{id}")
+    public Response<AccountVO> getUserInfo(@PathVariable Integer id) {
+        try{
+            return Response.buildSuccess(accountService.getAccountById(id));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"400");
         }
     }
 }

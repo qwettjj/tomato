@@ -50,6 +50,7 @@ const fetchUserInfo = async () => {
     role.value = response.data.role
     phone.value = response.data.phone
     email.value = response.data.email
+    sessionStorage.setItem('userId', response.data.id)
     // 处理地址对象
     address.value = typeof response.data.address === 'string' ?
         response.data.address :

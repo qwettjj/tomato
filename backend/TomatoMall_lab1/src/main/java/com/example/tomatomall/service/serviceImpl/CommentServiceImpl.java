@@ -6,6 +6,7 @@ import com.example.tomatomall.po.Post;
 import com.example.tomatomall.repository.CommentRepository;
 import com.example.tomatomall.repository.PostRepository;
 import com.example.tomatomall.service.CommentService;
+import com.example.tomatomall.util.SecurityUtil;
 import com.example.tomatomall.vo.CommentVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,12 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     PostRepository postRepository;
 
+    @Autowired
+    SecurityUtil securityUtil;
+
     @Override
-    public Boolean createComment(CommentVO commentVO, Integer accountId) {
+    public Boolean createComment(CommentVO commentVO) {
+        Integer accountId = securityUtil.getCurrentAccount().getId();
         Post post = postRepository.findById(commentVO.getPostId()).isPresent() ? postRepository.findById(commentVO.getPostId()).get() : null;
         if (post == null) {
             throw TomatoMallException.postNotExist();

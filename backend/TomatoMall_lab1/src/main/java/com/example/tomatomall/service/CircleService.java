@@ -30,4 +30,8 @@ public interface CircleService {
     List<AccountVO> getAllMembers(Integer circleId);
 
     AccountVO getOwner(Integer circleId);
+
+    List<CircleVO> getCircles();
+
+    CircleVO getCircle(Integer circleId);
 }
