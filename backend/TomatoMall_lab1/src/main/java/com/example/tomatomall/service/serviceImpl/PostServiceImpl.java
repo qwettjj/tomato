@@ -13,6 +13,7 @@ import com.example.tomatomall.util.SecurityUtil;
 import com.example.tomatomall.vo.PostVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +97,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public Integer unlikePost(Integer postId) {
         Integer accountId = securityUtil.getCurrentAccount().getId();
         Post post = postRepository.findById(postId).isPresent() ? postRepository.findById(postId).get() : null;
@@ -103,7 +105,7 @@ public class PostServiceImpl implements PostService {
             throw TomatoMallException.postNotExist();
         }
 
-        if(likeRepository.existsByPostIdAndAccountId(postId,accountId)){
+        if(!likeRepository.existsByPostIdAndAccountId(postId,accountId)){
             throw TomatoMallException.notAlreadyLike();
         }
 
@@ -111,6 +113,7 @@ public class PostServiceImpl implements PostService {
 
         post.setLikeCount(post.getLikeCount() - 1);
         postRepository.save(post);
+        likeRepository.deleteByPostIdAndAccountId(postId,accountId);
         return post.getLikeCount();
     }
 

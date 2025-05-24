@@ -11,4 +11,5 @@ public interface LikeRepository extends JpaRepository<Liked, Integer> {
     int countByPostId(Integer postId);
     List<Liked> findByPostId(Integer postId);
     List<Liked> findByAccountId(Integer accountId);
+    Liked findByPostIdAndAccountId(Integer postId, Integer accountId);
 }

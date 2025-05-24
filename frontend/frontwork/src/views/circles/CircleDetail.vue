@@ -72,6 +72,7 @@ const loadData = async () => {
     // 加载点赞数据
     const likedRes = await getLikedPosts()
     likedPostIds.value = new Set(likedRes.map(post => post.postId))
+    console.log("likedPostIds", likedPostIds.value)
 
     // 处理角色和基础数据
     currentUserRole.value = roleRes.data || 'VISITOR'
@@ -170,7 +171,9 @@ const toggleLike = async (post: PostInfo) => {
       tempLiked.delete(post.postId)
       post.likeCount--
       likedPostIds.value = tempLiked
-      await unlikePost(post.postId)
+      console.log("unliked postId : " + post.postId)
+      const res = await unlikePost(post.postId)
+      console.log("res",res)
     } else {
       // 点赞流程
       tempLiked.add(post.postId)

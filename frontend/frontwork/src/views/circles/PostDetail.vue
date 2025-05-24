@@ -19,7 +19,7 @@
           :class="{ 'liked': isLiked }"
           @click="handleLike"
       >
-        {{ isLiked ? '已赞' : '点赞' }}
+        {{ isLiked.value ? '已赞' : '点赞' }}
       </button>
     </div>
 
@@ -84,7 +84,8 @@ const fetchPostDetail = async () => {
   // 获取作者信息
   authorInfo.value = await getUserInfo(res.data.accountId)
   // 检查是否已点赞
-  isLiked.value = await judgeLiked(postId)
+  const res2 = await judgeLiked(postId)
+  isLiked.value = res2.data
 }
 
 // 获取评论列表
@@ -96,6 +97,7 @@ const fetchComments = async () => {
 
 // 处理点赞
 const handleLike = async () => {
+  console.log("isLiked.value : " + isLiked.value)
   if (isLiked.value) {
     await unlikePost(postId)
     post.value!.likeCount--
