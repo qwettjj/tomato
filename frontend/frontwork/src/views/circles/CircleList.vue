@@ -6,7 +6,6 @@ import {useRouter} from 'vue-router'
 import {Plus} from "@element-plus/icons-vue";
 import {uploadImage} from '../../api/tool'
 
-
 const previewCover = ref('')
 
 const beforeUpload = (file: File) => {
@@ -33,7 +32,7 @@ const customCoverUpload = async (options: any) => {
 
   try {
     const res = await uploadImage(formData)
-    newCircle.value.cover = res.data.data // 假设返回的地址在 data.data 中
+    newCircle.value.cover = res.data.data
     ElMessage.success('封面上传成功')
   } catch (err) {
     ElMessage.error('封面上传失败')
@@ -48,42 +47,57 @@ const handleCoverRemove = () => {
 const router = useRouter()
 const searchKeyword = ref('')
 const circles = ref<CircleVO[]>([])
+const filteredCircles = ref<CircleVO[]>([]) // 新增：用于存储筛选后的圈子
 const showCreateDialog = ref(false)
 const newCircle = ref<CircleVO>({
-  id : 0 ,
+  id: 0,
   title: '',
   description: '',
   cover: '',
   status: 1,
   creatorId: 0,
-  cover: '',
 })
 const userId = Number(sessionStorage.getItem('userId'))
 
 // 加载圈子列表
-const loadCircles = async (useSearch: boolean = false) => {
+const loadCircles = async () => {
   const loading = ElLoading.service({ fullscreen: true })
   try {
-    let response
-    if (useSearch && searchKeyword.value) {
-      response = await searchCircles(searchKeyword.value)
-    } else {
-      response = await getCircles()
-    }
+    const response = await getCircles()
     circles.value = response.data.map((circle: any) => ({
       id: circle.id,
       title: circle.title,
       description: circle.description,
       cover: circle.cover,
-      status : circle.status,
-      creatorId: circle.creatorId
+      status: circle.status,
+      creatorId: circle.creatorId,
+      memberCount: circle.memberCount || 0,
+      postCount: circle.postCount || 0
     }))
+    filterCircles() // 加载后立即执行筛选
   } catch (error: any) {
     ElMessage.error(error.response?.data?.message || '加载失败')
   } finally {
     loading.close()
   }
 }
+
+// 新增：筛选圈子函数
+const filterCircles = () => {
+  if (!searchKeyword.value) {
+    filteredCircles.value = [...circles.value]
+    return
+  }
+
+  const keyword = searchKeyword.value.toLowerCase()
+  filteredCircles.value = circles.value.filter(circle =>
+      circle.title.toLowerCase().includes(keyword)
+  )}
+
+// 监听搜索关键词变化
+watch(searchKeyword, () => {
+  filterCircles()
+})
 
 // 创建圈子
 const handleCreateCircle = async () => {
@@ -123,7 +137,7 @@ const navigateToCircle = (circleId: number) => {
 
 // 初始化加载
 onMounted(() => {
-  console.log("当前用户Id : " + userId);
+  console.log("当前用户Id : " + userId)
   loadCircles()
 })
 </script>
@@ -135,11 +149,10 @@ onMounted(() => {
       <el-input
           v-model="searchKeyword"
           placeholder="搜索圈子"
-          @keyup.enter="loadCircles(true)"
           clearable
       >
         <template #append>
-          <el-button icon="Search" @click="loadCircles(true)" />
+          <el-button icon="Search" />
         </template>
       </el-input>
 
@@ -151,7 +164,7 @@ onMounted(() => {
     <!-- 圈子列表 -->
     <div class="horizontal-list-container">
       <div
-          v-for="circle in circles"
+          v-for="circle in filteredCircles"
           :key="circle.id"
           class="horizontal-circle-item"
           @click="navigateToCircle(circle.id)"
@@ -162,8 +175,6 @@ onMounted(() => {
             <div class="item-title">{{ circle.title }}</div>
             <div class="item-description">{{ circle.description }}</div>
             <div class="item-meta">
-              <el-tag>成员 {{ circle.memberCount }}</el-tag>
-              <el-tag type="success">帖子 {{ circle.postCount }}</el-tag>
             </div>
           </div>
           <el-button
@@ -176,6 +187,11 @@ onMounted(() => {
             删除
           </el-button>
         </div>
+      </div>
+
+      <!-- 无搜索结果提示 -->
+      <div v-if="filteredCircles.length === 0 && searchKeyword" class="no-result">
+        没有找到匹配的圈子
       </div>
     </div>
 
@@ -232,6 +248,14 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* 原有样式保持不变，新增无搜索结果样式 */
+.no-result {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 16px;
+}
+
 .circle-list-container {
   max-width: 1200px;
   margin: 20px 50px;
@@ -312,7 +336,6 @@ onMounted(() => {
   margin-left: auto;
 }
 
-/* 以下样式保持不变 */
 .upload-area {
   position: relative;
   width: 150px;

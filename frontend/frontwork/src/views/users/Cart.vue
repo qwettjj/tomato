@@ -135,6 +135,7 @@ const loadCart = async () => {
   try {
     const res = await getCartItems();
     const basicItems = res.data;
+    console.log(basicItems);
 
     const itemsWithProducts = await Promise.all(
         basicItems.map(async item => {

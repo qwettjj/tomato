@@ -434,7 +434,7 @@ onMounted(() => {
               <el-avatar :size="40" :src="member.avatar" />
               <div class="member-info">
                 <span class="name">{{ member.name }}</span>
-                <span class="username">@{{ member.username }}</span>
+                <span class="username">@{{ member.userName }}</span>
               </div>
               <div class="actions">
                 <el-button
