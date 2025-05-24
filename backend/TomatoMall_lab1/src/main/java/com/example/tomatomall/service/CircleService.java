@@ -9,9 +9,9 @@ import java.util.List;
 public interface CircleService {
     Boolean createCircle(CircleVO circleVO);
 
-    Boolean joinCircle(Integer circleId, Integer accountId, CircleEnum circleEnum);
+    Boolean joinCircle(Integer circleId, CircleEnum circleEnum);
 
-    Boolean leaveCircle(Integer circleId, Integer accountId);
+    Boolean leaveCircle(Integer circleId);
 
     List<CircleVO> searchCircle(String keyword);
 
