@@ -8,4 +8,5 @@ public interface CommentService {
     Boolean createComment(CommentVO commentVO);
     List<CommentVO> getPostComments(Integer postId);
     Boolean deleteComment(Integer commentId);
+    CommentVO getComment(Integer commentId);
 }

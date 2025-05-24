@@ -42,4 +42,13 @@ public class CommentController {
             return Response.buildFailure(e.getMessage(),"400");
         }
     }
+
+    @PostMapping("/get/{commentId}")
+    public Response<CommentVO> getComment(@PathVariable Integer commentId) {
+        try {
+            return Response.buildSuccess(commentService.getComment(commentId));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"400");
+        }
+    }
 }

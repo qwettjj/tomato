@@ -64,5 +64,13 @@ public class CommentServiceImpl implements CommentService {
         return true;
     }
 
+    @Override
+    public CommentVO getComment(Integer commentId) {
+        Comment comment = commentRepository.findById(commentId).orElse(null);
+        if (comment == null) {
+            throw TomatoMallException.commentNotExist();
+        }
+        return comment.toVO();
+    }
 
 }
