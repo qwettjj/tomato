@@ -18,19 +18,20 @@
 
     <!-- 评论输入框 -->
     <div class="comment-input">
-      <textarea
-          v-model="newComment"
-          placeholder="写下你的评论..."
-          @keydown.enter.exact.prevent="submitComment"
-      ></textarea>
+    <textarea
+        v-model="newComment"
+        :placeholder="replyPlaceholder"
+        @keydown.enter.exact.prevent="submitComment"
+    ></textarea>
       <div class="action-buttons">
+        <button @click="cancelReply" v-if="replyingTo">取消回复</button>
         <button @click="submitComment">发布</button>
         <button
             class="like-button"
             :class="{ 'liked': isLiked }"
             @click="handleLike"
         >
-          {{ isLiked ? '已赞' : '点赞' }}
+          {{ isLiked.value ? '已赞' : '点赞' }}
         </button>
       </div>
     </div>
@@ -50,8 +51,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref,  onMounted,computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import {
   getPostDetail,
   likePost,
@@ -78,13 +80,20 @@ const isLiked = ref(false)
 // 评论相关状态
 const comments = ref<CommentVO[]>([])
 const newComment = ref('')
-const replyingTo = ref<number | null>(null)
+const replyingTo = ref<{commentId: number, userName: string} | null>(null)
 
 // 获取楼层文字
 const getFloorText = (index: number) => {
   const floorNumber = index + 1
   return `${floorNumber}楼`
 }
+
+// 计算回复提示文本
+const replyPlaceholder = computed(() => {
+  return replyingTo.value
+      ? `回复 @${replyingTo.value.userName}:`
+      : '写下你的评论...'
+})
 
 // 获取帖子详情
 const fetchPostDetail = async () => {
@@ -93,7 +102,9 @@ const fetchPostDetail = async () => {
   // 获取作者信息
   authorInfo.value = await getUserInfo(res.data.accountId)
   // 检查是否已点赞
-  isLiked.value = await judgeLiked(postId)
+  // isLiked.value = await judgeLiked(postId)
+  const res2=await judgeLiked(postId)
+  isLiked.value = res2.data;
 }
 
 // 获取评论列表
@@ -107,12 +118,29 @@ const fetchComments = async () => {
 const handleLike = async () => {
   if (isLiked.value) {
     await unlikePost(postId)
-    post.value!.likeCount--
+    post.value.likeCount--
   } else {
     await likePost(postId)
-    post.value!.likeCount++
+    post.value.likeCount++
   }
   isLiked.value = !isLiked.value
+}
+
+
+// 处理回复
+const handleReply = (payload: {commentId: number, userName: string}) => {
+  replyingTo.value = payload
+  newComment.value = `@${payload.userName} `
+  // 自动聚焦到输入框
+  setTimeout(() => {
+    document.querySelector('.comment-input textarea')?.focus()
+  }, 0)
+}
+
+// 取消回复
+const cancelReply = () => {
+  replyingTo.value = null
+  newComment.value = ''
 }
 
 // 提交评论
@@ -122,21 +150,19 @@ const submitComment = async () => {
   const commentInfo = {
     postId: postId,
     content: newComment.value,
-    parentId: replyingTo.value
+    parentId: replyingTo.value?.commentId || null
   }
-  console.log(commentInfo)
-  await createComment(commentInfo)
-  newComment.value = ''
-  replyingTo.value = null
-  await fetchComments()
-}
 
-// 处理回复
-const handleReply = (commentId: number) => {
-  replyingTo.value = commentId
-  // 这里可以添加自动聚焦到输入框的逻辑
+  try {
+    await createComment(commentInfo)
+    newComment.value = ''
+    replyingTo.value = null
+    await fetchComments()
+    ElMessage.success('评论成功')
+  } catch (error) {
+    ElMessage.error('评论失败')
+  }
 }
-
 // 时间格式化
 const formatTime = (timestamp: number) => {
   return new Date(timestamp).toLocaleString()

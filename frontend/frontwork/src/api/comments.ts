@@ -27,3 +27,8 @@ export const deleteComment = (commentId: number) => {
     return axios.post(`${COMMENT_MODULE}/delete/${commentId}`)
         .then(res => res.data);
 };
+// 添加获取单个评论的方法
+export const getComment = (commentId: number) => {
+    return axios.post(`${COMMENT_MODULE}/get/${commentId}`)
+        .then(res => res.data.data);
+};
