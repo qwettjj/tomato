@@ -98,7 +98,8 @@ import type { AxiosError } from 'axios';
 import {
   getCartItems,
   removeCartItem,
-  updateCartItem
+  updateCartItem,
+  removeCartItemById
 } from '../../api/cartItem';
 import { getProduct } from '../../api/products';
 import { createOrder } from '../../api/orders';
@@ -233,7 +234,7 @@ const updateQuantity = async (item: CartItem, change: number) => {
 // 删除商品
 const removeItem = async (cartItemId: number) => {
   try {
-    await removeCartItem(cartItemId);
+    await removeCartItemById(cartItemId);
     ElMessage.success('商品已移除');
     cartItems.value = cartItems.value.filter(item => item.id !== cartItemId);
     updateSelectAllState();
