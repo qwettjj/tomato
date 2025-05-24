@@ -17,6 +17,7 @@ import com.example.tomatomall.vo.AccountVO;
 import com.example.tomatomall.vo.CircleVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +82,7 @@ public class CircleServiceImpl implements CircleService {
     }
 
     @Override
+    @Transactional
     public Boolean leaveCircle(Integer circleId) {
         Integer accountId = securityUtil.getCurrentAccount().getId();
         circleMemberRepository.deleteByCircleIdAndAccountId(circleId, accountId);

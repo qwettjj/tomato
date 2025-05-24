@@ -318,7 +318,7 @@ onMounted(() => {
         </span>
         <span class="time">{{ posts[0].createTime }}</span>
         <span class="stats">
-          👁️ {{ posts[0].viewCount }} 赞 {{ posts[0].likeCount }}  💬 {{ posts[0].commentCount }}
+          👁️ {{ posts[0].viewCount }} 🤍 {{ posts[0].likeCount }}  💬 {{ posts[0].commentCount }}
         </span>
       </div>
       <div class="post-content">详情：{{ posts[0].content }}</div>

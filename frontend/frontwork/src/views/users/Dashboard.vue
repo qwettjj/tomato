@@ -131,6 +131,18 @@ const saveChanges = async () => {
     email.value = editForm.value.email
     address.value = editForm.value.address
 
+    // 如果有修改密码，则跳转到注册页面
+    if (editForm.value.newPassword && isPasswordIdentical.value) {
+      ElMessage.success('密码已修改，请重新登录')
+      // 清空用户会话信息
+      sessionStorage.clear()
+      // 延迟跳转让用户看到提示信息
+      setTimeout(() => {
+        router.push('/login')
+      }, 1500)
+      return
+    }
+
     ElMessage.success('个人信息更新成功')
     isEditing.value = false
   } catch (error) {
@@ -408,6 +420,7 @@ const goToModifyProduct = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 0 0 0;
 }
 
 @media (max-width: 992px) {

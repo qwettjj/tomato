@@ -284,7 +284,7 @@ onMounted(() => {
 <style scoped>
 .cart-container {
   max-width: 1200px;
-  margin: 40px auto;
+  margin: 40px 100px;
   padding: 30px;
   background-color: #ffffff;
   border-radius: 12px;

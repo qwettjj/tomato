@@ -10,7 +10,7 @@
         </span>
         <span class="time">{{ formatTime(post.createTime) }}</span>
         <span class="stats">
-          👁️ {{ post.viewCount }} 赞 {{ post.likeCount }}  💬 {{ post.commentCount }}
+          👁️ {{ post.viewCount }} 🤍 {{ post.likeCount }}  💬 {{ post.commentCount }}
         </span>
       </div>
       <div class="post-content">详情：{{ post.content }}</div>
@@ -31,7 +31,7 @@
             :class="{ 'liked': isLiked }"
             @click="handleLike"
         >
-          {{ isLiked.value ? '已赞' : '点赞' }}
+          {{ isLiked.value? '' : '❤' }}
         </button>
       </div>
     </div>
@@ -233,11 +233,12 @@ onMounted(async () => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  color: #666; /* 默认灰色 */
 }
 
 .like-button.liked {
-  background: #409eff;
-  color: white;
+  background: #fff0f0; /* 浅红色背景 */
+  color: #ff4d4d; /* 红色爱心 */
 }
 
 .comment-input button {
