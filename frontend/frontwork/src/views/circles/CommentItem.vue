@@ -1,6 +1,3 @@
-以下是完整的修改后的代码，实现了将删除和回复按钮靠右对齐的效果：
-
-html
 <template>
   <div class="comment" :style="{ marginLeft: depth * 30 + 'px' }">
     <div class="comment-header">

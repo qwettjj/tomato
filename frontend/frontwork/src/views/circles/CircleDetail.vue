@@ -477,7 +477,7 @@ onMounted(() => {
 
 <style scoped>
 .circle-detail-container {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 20px 50px;
   padding: 0 20px;
 }

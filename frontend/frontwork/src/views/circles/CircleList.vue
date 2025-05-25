@@ -257,7 +257,7 @@ onMounted(() => {
 }
 
 .circle-list-container {
-  max-width: 1200px;
+  max-width: 1900px;
   margin: 20px 50px;
   padding: 0 20px;
 }
