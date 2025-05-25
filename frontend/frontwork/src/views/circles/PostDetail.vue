@@ -31,7 +31,7 @@
             :class="{ 'liked': isLiked }"
             @click="handleLike"
         >
-          {{ isLiked ? '❤️' : '🤍' }}
+          {{ isLiked.value ? '' : '❤' }}
         </button>
       </div>
     </div>
@@ -103,6 +103,9 @@ const fetchPostDetail = async () => {
   const res = await getPostDetail(postId)
   post.value = res.data
   authorInfo.value = await getUserInfo(res.data.accountId)
+
+  const res2 = await judgeLiked(postId)
+  isLiked.value = res2.data
 
   currentUserId.value = sessionStorage.getItem('userId')
 }
