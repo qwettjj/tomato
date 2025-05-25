@@ -12,5 +12,5 @@ public interface CircleMemberRepository extends JpaRepository<CircleMember, Inte
     List<CircleMember> findByAccountId(Integer accountId);
     int countByCircleId(Integer circleId);
     Boolean existsByCircleIdAndAccountId(Integer circleId, Integer accountId);
-    Boolean deleteByCircleIdAndAccountId(Integer circleId, Integer accountId);
+    Integer deleteByCircleIdAndAccountId(Integer circleId, Integer accountId);
 }

@@ -41,16 +41,15 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
+    @Transactional
     public Boolean removeCartItem(Integer productId){
         Integer userId = securityUtil.getCurrentAccount().getId();
-        CartItem cartItem = cartItemRepository.findCartItemByUserIdAndProductId(userId, productId);
-        if (cartItem != null) {
-            cartItemRepository.delete(cartItem);
-            return true;
-        }
-        else {
+        int deletedCount = cartItemRepository.deleteByUserIdAndProductId(userId, productId);
+
+        if (deletedCount == 0) {
             throw TomatoMallException.cartItemNotFound();
         }
+        return true;
     }
 
     @Override

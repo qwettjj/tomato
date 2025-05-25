@@ -26,7 +26,7 @@ export const removeCartItem = (productId : number) => {
 export const removeCartItemById = (CartItemId: number) => {
     return axios.delete(`${CART_MODULE}/removeById`, {
         params: {
-            CartItemId: CartItemId
+            cartItemId: CartItemId
         }
     }).then(res => res.data);
 }

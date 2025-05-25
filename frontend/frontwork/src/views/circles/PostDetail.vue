@@ -10,38 +10,44 @@
         </span>
         <span class="time">{{ formatTime(post.createTime) }}</span>
         <span class="stats">
-          👁️ {{ post.viewCount }} 赞 {{ post.likeCount }}  💬 {{ post.commentCount }}
+          👁️ {{ post.viewCount }} 🤍 {{ post.likeCount }} 💬 {{ post.commentCount }}
         </span>
       </div>
-      <div class="post-content">{{ post.content }}</div>
-      <button
-          class="like-button"
-          :class="{ 'liked': isLiked }"
-          @click="handleLike"
-      >
-        {{ isLiked.value ? '已赞' : '点赞' }}
-      </button>
+      <div class="post-content">详情：{{ post.content }}</div>
     </div>
 
     <!-- 评论输入框 -->
     <div class="comment-input">
       <textarea
           v-model="newComment"
-          placeholder="写下你的评论..."
+          :placeholder="replyPlaceholder"
           @keydown.enter.exact.prevent="submitComment"
       ></textarea>
-      <button @click="submitComment">发布</button>
+      <div class="action-buttons">
+        <button @click="cancelReply" v-if="replyingTo">取消回复</button>
+        <button @click="submitComment">发布</button>
+        <button
+            class="like-button"
+            :class="{ 'liked': isLiked }"
+            @click="handleLike"
+        >
+          {{ isLiked.value ? '' : '❤' }}
+        </button>
+      </div>
     </div>
 
     <!-- 评论列表 -->
     <div class="comments">
-      <CommentItem
-          v-for="comment in comments"
-          :key="comment.commentId"
-          :comment="comment"
-          :depth="0"
-          @reply="handleReply"
-      />
+      <div v-for="(comment, index) in comments" :key="comment.commentId" class="comment-item">
+        <div class="comment-floor">{{ getFloorText(index) }}</div>
+        <CommentItem
+            :comment="comment"
+            :depth="0"
+            :currentUserId="currentUserId"
+            @reply="handleReply"
+            @delete="handleCommentDelete"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -49,6 +55,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import {
   getPostDetail,
   likePost,
@@ -71,41 +78,69 @@ const postId = parseInt(route.params.postId as string)
 const post = ref<PostInfo>()
 const authorInfo = ref<accountVO>()
 const isLiked = ref(false)
+const currentUserId = ref<number>(1) // 这里假设当前用户ID为1，实际应从登录状态获取
 
 // 评论相关状态
 const comments = ref<CommentVO[]>([])
 const newComment = ref('')
-const replyingTo = ref<number | null>(null)
+const replyingTo = ref<{commentId: number, userName: string} | null>(null)
+
+// 获取楼层文字
+const getFloorText = (index: number) => {
+  const floorNumber = index + 1
+  return `${floorNumber}楼`
+}
+
+// 计算回复提示文本
+const replyPlaceholder = computed(() => {
+  return replyingTo.value
+      ? `回复 @${replyingTo.value.userName}:`
+      : '写下你的评论...'
+})
 
 // 获取帖子详情
 const fetchPostDetail = async () => {
   const res = await getPostDetail(postId)
   post.value = res.data
-  // 获取作者信息
   authorInfo.value = await getUserInfo(res.data.accountId)
-  // 检查是否已点赞
+
   const res2 = await judgeLiked(postId)
   isLiked.value = res2.data
+
+  currentUserId.value = sessionStorage.getItem('userId')
 }
 
 // 获取评论列表
 const fetchComments = async () => {
   const res = await getPostComments(postId)
   comments.value = res
-  console.log(res)
 }
 
 // 处理点赞
 const handleLike = async () => {
-  console.log("isLiked.value : " + isLiked.value)
   if (isLiked.value) {
     await unlikePost(postId)
-    post.value!.likeCount--
+    post.value.likeCount--
   } else {
     await likePost(postId)
-    post.value!.likeCount++
+    post.value.likeCount++
   }
   isLiked.value = !isLiked.value
+}
+
+// 处理回复
+const handleReply = (payload: {commentId: number, userName: string}) => {
+  replyingTo.value = payload
+  newComment.value = `@${payload.userName} `
+  setTimeout(() => {
+    document.querySelector('.comment-input textarea')?.focus()
+  }, 0)
+}
+
+// 取消回复
+const cancelReply = () => {
+  replyingTo.value = null
+  newComment.value = ''
 }
 
 // 提交评论
@@ -115,24 +150,31 @@ const submitComment = async () => {
   const commentInfo = {
     postId: postId,
     content: newComment.value,
-    parentId: replyingTo.value
+    parentId: replyingTo.value?.commentId || null
   }
-  console.log(commentInfo)
-  await createComment(commentInfo)
-  newComment.value = ''
-  replyingTo.value = null
-  await fetchComments()
+
+  try {
+    await createComment(commentInfo)
+    newComment.value = ''
+    replyingTo.value = null
+    await fetchComments()
+    ElMessage.success('评论成功')
+  } catch (error) {
+    ElMessage.error('评论失败')
+  }
 }
 
-// 处理回复
-const handleReply = (commentId: number) => {
-  replyingTo.value = commentId
-  // 这里可以添加自动聚焦到输入框的逻辑
+// 处理评论删除
+const handleCommentDelete = (deletedCommentId: number) => {
+  comments.value = comments.value.filter(comment => comment.commentId !== deletedCommentId)
+  if (post.value) {
+    post.value.commentCount--
+  }
 }
 
 // 时间格式化
-const formatTime = (timestamp: number) => {
-  return new Date(timestamp).toLocaleString()
+const formatTime = (time: string | Date) => {
+  return new Date(time).toLocaleString()
 }
 
 onMounted(async () => {
@@ -143,9 +185,9 @@ onMounted(async () => {
 
 <style scoped>
 .post-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 1600px;
+  margin: 20px 50px;
+  padding: 0 20px;
 }
 
 .post-title {
@@ -171,19 +213,8 @@ onMounted(async () => {
 .post-content {
   line-height: 1.6;
   margin-bottom: 20px;
-}
-
-.like-button {
-  padding: 8px 16px;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.like-button.liked {
-  background: #409eff;
-  color: white;
+  text-align: left;
+  padding-left: 0;
 }
 
 .comment-input {
@@ -199,6 +230,26 @@ onMounted(async () => {
   border-radius: 4px;
 }
 
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.like-button {
+  padding: 8px 16px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #666;
+}
+
+.like-button.liked {
+  background: #fff0f0;
+  color: #ff4d4d;
+}
+
 .comment-input button {
   padding: 8px 16px;
   background: #409eff;
@@ -206,5 +257,22 @@ onMounted(async () => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.comments {
+  margin-top: 30px;
+}
+
+.comment-item {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  text-align: left;
+}
+
+.comment-floor {
+  font-weight: bold;
+  color: #409eff;
+  margin-bottom: 5px;
 }
 </style>

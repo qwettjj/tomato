@@ -125,6 +125,12 @@ const router = createRouter({
                     meta: {title: '书友圈'},
                 },
                 {
+                    path: '/home/circles/postliked',
+                    name: 'PostLiked',
+                    component: () => import('../views/circles/PostLiked.vue'),
+                    meta: {title: '我喜欢的帖子'},
+                },
+                {
                     path: '/home/circles/:circleId',
                     name: 'CircleDetail',
                     component: () => import('../views/circles/CircleDetail.vue'),
@@ -136,6 +142,7 @@ const router = createRouter({
                     component: () => import('../views/circles/PostDetail.vue'),
                     meta: {title : '评论详情'},
                 }
+
             ]
         },
         {

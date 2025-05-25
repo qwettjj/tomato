@@ -98,7 +98,8 @@ import type { AxiosError } from 'axios';
 import {
   getCartItems,
   removeCartItem,
-  updateCartItem
+  updateCartItem,
+  removeCartItemById
 } from '../../api/cartItem';
 import { getProduct } from '../../api/products';
 import { createOrder } from '../../api/orders';
@@ -135,6 +136,7 @@ const loadCart = async () => {
   try {
     const res = await getCartItems();
     const basicItems = res.data;
+    console.log(basicItems);
 
     const itemsWithProducts = await Promise.all(
         basicItems.map(async item => {
@@ -232,7 +234,7 @@ const updateQuantity = async (item: CartItem, change: number) => {
 // 删除商品
 const removeItem = async (cartItemId: number) => {
   try {
-    await removeCartItem(cartItemId);
+    await removeCartItemById(cartItemId);
     ElMessage.success('商品已移除');
     cartItems.value = cartItems.value.filter(item => item.id !== cartItemId);
     updateSelectAllState();
@@ -283,8 +285,8 @@ onMounted(() => {
 
 <style scoped>
 .cart-container {
-  max-width: 1200px;
-  margin: 40px auto;
+  max-width: 1600px;
+  margin: 40px 100px;
   padding: 30px;
   background-color: #ffffff;
   border-radius: 12px;

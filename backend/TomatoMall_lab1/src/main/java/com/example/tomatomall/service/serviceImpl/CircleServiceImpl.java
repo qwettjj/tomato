@@ -17,6 +17,7 @@ import com.example.tomatomall.vo.AccountVO;
 import com.example.tomatomall.vo.CircleVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public class CircleServiceImpl implements CircleService {
     @Autowired
     SecurityUtil securityUtil;
 
+
     @Override
     public Boolean createCircle(CircleVO circleVO) {
         Circle circle = circleVO.toPO();
@@ -50,14 +52,15 @@ public class CircleServiceImpl implements CircleService {
         circle.setCreatorId(securityUtil.getCurrentAccount().getId());
         Circle savedCircle = circleRepository.save(circle);
 
-        if(joinCircle(savedCircle.getCircleId(), savedCircle.getCreatorId(), CircleEnum.OWNER)) {
+        if(joinCircle(savedCircle.getCircleId(), CircleEnum.OWNER)) {
             return true;
         }
         return false;
     }
 
     @Override
-    public Boolean joinCircle(Integer circleId, Integer accountId, CircleEnum circleEnum) {
+    public Boolean joinCircle(Integer circleId, CircleEnum circleEnum) {
+        Integer accountId = securityUtil.getCurrentAccount().getId();
         if(circleMemberRepository.existsByCircleIdAndAccountId(circleId, accountId)) {
             throw TomatoMallException.alreadyJoinCircle();
         }
@@ -79,7 +82,9 @@ public class CircleServiceImpl implements CircleService {
     }
 
     @Override
-    public Boolean leaveCircle(Integer circleId, Integer accountId) {
+    @Transactional
+    public Boolean leaveCircle(Integer circleId) {
+        Integer accountId = securityUtil.getCurrentAccount().getId();
         circleMemberRepository.deleteByCircleIdAndAccountId(circleId, accountId);
 
         Circle circle = circleRepository.findById(circleId).isPresent() ? circleRepository.findById(circleId).get() : null;

@@ -39,18 +39,18 @@ public class CircleController {
     }
 
     @PostMapping("/{circleId}/join")
-    public Response<Boolean> joinCircle(@PathVariable Integer circleId, @RequestAttribute Integer accountId) {
+    public Response<Boolean> joinCircle(@PathVariable Integer circleId) {
         try{
-            return Response.buildSuccess(circleService.joinCircle(circleId, accountId, CircleEnum.MEMBER));
+            return Response.buildSuccess(circleService.joinCircle(circleId, CircleEnum.MEMBER));
         }catch (TomatoMallException e){
             return Response.buildFailure(e.getMessage(),"400");
         }
     }
 
     @PostMapping("/{circleId}/leave")
-    public Response<Boolean> leaveCircle(@PathVariable Integer circleId, @RequestAttribute Integer accountId) {
+    public Response<Boolean> leaveCircle(@PathVariable Integer circleId) {
         try{
-            return Response.buildSuccess(circleService.leaveCircle(circleId, accountId));
+            return Response.buildSuccess(circleService.leaveCircle(circleId));
         }catch (TomatoMallException e){
             return Response.buildFailure(e.getMessage(),"400");
         }
