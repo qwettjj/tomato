@@ -66,3 +66,22 @@ export const getProduct = (id: number) => {
     return axios.get<ProductVO>(`${PRODUCT_MODULE}/${id}`)
         .then(res => res.data)
 }
+
+export const rateProduct = (id: number, rate: number) => {
+    return axios.patch<Response<number>>(
+        `${PRODUCT_MODULE}/rate/${id}`, rate
+    ).then(res => res.data)
+}
+
+export const freezeProduct = (id: number) => {
+    return axios.patch<Response<boolean>>(
+        `${PRODUCT_MODULE}/frozen/${id}`
+    ).then(res => res.data)
+}
+
+export const unfreezeProduct = (id: number) => {
+    return axios.patch<Response<boolean>>(
+        `${PRODUCT_MODULE}/unfrozen/${id}`
+    ).then(res => res.data)
+}
+

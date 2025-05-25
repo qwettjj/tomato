@@ -11,5 +11,5 @@ public interface OrderService {
     Integer createOrder(Integer totalAmount , String paymentMethod, List<Integer> cartItemId, Map<Integer,Integer> productInfo);
     Boolean updateOrderStatus(Integer orderId,String status);
     Boolean deleteOrder(Integer orderId);
-
+    List<OrderVO> getUserOrders();
 }

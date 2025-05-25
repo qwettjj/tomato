@@ -97,3 +97,7 @@ export const deleteOrderDirectly = (params: DeleteOrderDirectlyInfo) => {
         }
     }).then(res => res.data)
 }
+
+export const getUserOrders = () => {
+    return axios.get(`${ORDER_MODULE}/getUserOrders`).then((res) => res.data)
+}

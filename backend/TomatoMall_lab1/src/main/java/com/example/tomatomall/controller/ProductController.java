@@ -64,7 +64,32 @@ public class ProductController {
         }
     }
 
+    @PatchMapping("/rate/{id}")
+    public Response<Integer> rateProduct(@PathVariable Integer id,@RequestBody Integer rate) {
+        try{
+            return Response.buildSuccess(productService.rateProduct(id,rate));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"400");
+        }
+    }
 
+    @PatchMapping("/frozen/{id}")
+    public Response<Boolean> frozeProduct(@PathVariable Integer id) {
+        try{
+            return Response.buildSuccess(productService.frozenProduct(id));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"400");
+        }
+    }
+
+    @PatchMapping("/unfrozen/{id}")
+    public Response<Boolean> unfrozeProduct(@PathVariable Integer id) {
+        try{
+            return Response.buildSuccess(productService.unfrozenProduct(id));
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"400");
+        }
+    }
 }
 
 

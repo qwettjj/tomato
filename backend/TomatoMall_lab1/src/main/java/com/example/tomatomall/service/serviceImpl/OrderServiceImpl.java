@@ -9,9 +9,11 @@ import com.example.tomatomall.repository.OrderRepository;
 import com.example.tomatomall.repository.ProductRepository;
 import com.example.tomatomall.service.OrderService;
 import com.example.tomatomall.util.SecurityUtil;
+import com.example.tomatomall.vo.OrderVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,6 +70,7 @@ public class OrderServiceImpl implements OrderService {
                         for(Integer productId_ : productInfo.keySet()){
                             Product product = productRepository.findById(productId_).get();
                             product.setAmount(product.getAmount()+productInfo.get(productId_));
+                            productRepository.save(product);
                         }
                     }
                 }
@@ -98,6 +101,22 @@ public class OrderServiceImpl implements OrderService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public List<OrderVO> getUserOrders() {
+        Integer userId = securityUtil.getCurrentAccount().getId();
+        List<Order> orders = new ArrayList<>();
+        if(orderRepository.existsByUserId(userId)){
+            orders = orderRepository.findByUserId(userId);
+        }
+
+        List<OrderVO> orderVOList = new ArrayList<>();
+        for(Order order : orders){
+            orderVOList.add(order.toVO());
+        }
+
+        return orderVOList;
     }
 
 }

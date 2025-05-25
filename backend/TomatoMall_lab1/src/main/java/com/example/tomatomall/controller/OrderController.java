@@ -1,5 +1,6 @@
 package com.example.tomatomall.controller;
 
+import com.example.tomatomall.exception.TomatoMallException;
 import com.example.tomatomall.po.CartItem;
 import com.example.tomatomall.po.Order;
 import com.example.tomatomall.po.Product;
@@ -7,12 +8,10 @@ import com.example.tomatomall.repository.CartItemRepository;
 import com.example.tomatomall.repository.OrderRepository;
 import com.example.tomatomall.repository.ProductRepository;
 import com.example.tomatomall.service.OrderService;
+import com.example.tomatomall.vo.OrderVO;
 import com.example.tomatomall.vo.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.*;
 
 @RestController
@@ -104,5 +103,14 @@ public class OrderController {
         product.setAmount(product.getAmount()+quantity);
         productRepository.save(product);
         return Response.buildSuccess(orderService.deleteOrder(orderId));
+    }
+
+    @GetMapping("/getUserOrders")
+    public Response<List<OrderVO>> getUserOrders(){
+        try{
+            return Response.buildSuccess(orderService.getUserOrders());
+        }catch (TomatoMallException e){
+            return Response.buildFailure(e.getMessage(),"400");
+        }
     }
 }

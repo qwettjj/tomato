@@ -16,4 +16,9 @@ public interface ProductService {
 
     ProductVO getProduct(Integer productId);
 
+    Integer rateProduct(Integer productId,Integer rate);
+
+    Boolean frozenProduct(Integer productId);
+
+    Boolean unfrozenProduct(Integer productId);
 }

@@ -24,6 +24,8 @@ public class ProductServiceImpl implements ProductService {
             throw TomatoMallException.productAlreadyExists();
         }
         Product newProduct = productVO.toPO();
+        newProduct.setRateNum(0);
+        newProduct.setFrozen(0);
         productRepository.save(newProduct);
         return true;
     }
@@ -79,6 +81,47 @@ public class ProductServiceImpl implements ProductService {
             throw TomatoMallException.productNotFound();
         }
         return product.toVO();
+    }
+
+    @Override
+    public Integer rateProduct(Integer productId,Integer rate){
+        Product product = productRepository.findById(productId).isPresent() ? productRepository.findById(productId).get() : null;
+        if(product == null){
+            throw TomatoMallException.productNotFound();
+        }
+        else{
+            product.setRateNum(product.getRateNum()+1);
+            Integer newRate = (product.getRate() + rate) / product.getRateNum();
+            product.setRate(newRate);
+            productRepository.save(product);
+            return newRate;
+        }
+    }
+
+    @Override
+    public Boolean frozenProduct(Integer productId){
+        Product product = productRepository.findById(productId).isPresent() ? productRepository.findById(productId).get() : null;
+        if(product == null){
+            throw TomatoMallException.productNotFound();
+        }
+        else{
+            product.setFrozen(1);
+            productRepository.save(product);
+            return true;
+        }
+    }
+
+    @Override
+    public Boolean unfrozenProduct(Integer productId){
+        Product product = productRepository.findById(productId).isPresent() ? productRepository.findById(productId).get() : null;
+        if(product == null){
+            throw TomatoMallException.productNotFound();
+        }
+        else{
+            product.setFrozen(0);
+            productRepository.save(product);
+            return true;
+        }
     }
 }
 

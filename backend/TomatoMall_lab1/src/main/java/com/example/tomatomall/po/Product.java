@@ -51,6 +51,10 @@ public class Product {
     @Column(name = "frozen")
     private Integer frozen;
 
+    @Basic
+    @Column(name = "rate_num")
+    private Integer rateNum;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "specifications", joinColumns = @JoinColumn(name = "product_id"))
     private Set<Specifications> specifications;
