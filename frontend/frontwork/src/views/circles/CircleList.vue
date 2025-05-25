@@ -3,7 +3,7 @@ import {onMounted, ref, watch} from 'vue'
 import {ElLoading, ElMessage, ElMessageBox} from 'element-plus'
 import {type CircleVO, createCircle, deleteCircle, getCircles, searchCircles} from '../../api/circles'
 import {useRouter} from 'vue-router'
-import {Plus} from "@element-plus/icons-vue";
+import {Plus,Search} from "@element-plus/icons-vue";
 import {uploadImage} from '../../api/tool'
 
 const previewCover = ref('')
@@ -152,10 +152,15 @@ onMounted(() => {
           clearable
       >
         <template #append>
-          <el-button icon="Search" />
+          <el-icon><Search /></el-icon>
         </template>
       </el-input>
-
+      <el-button
+          type="success"
+          @click="$router.push('/home/circles/postliked')"
+      >
+        查看我喜欢的帖子
+      </el-button>
       <el-button type="primary" @click="showCreateDialog = true">
         新建圈子
       </el-button>
