@@ -13,12 +13,15 @@
           title="商品原始信息"
           type="info"
           show-icon
-          class="mb-4"
+          class="mb-4 left-align-alert"
       >
         <p>原名称：{{ originalForm.productName }}</p>
         <p>原价格：¥{{ originalForm.price }}</p>
         <p>原库存：{{ originalForm.amount }}</p>
+        <p>原评分：{{ originalForm.rate || '无' }}</p>
+        <p>原状态：{{ originalForm.frozen ? '已冻结' : '未冻结' }}</p>
         <p>原描述：{{ originalForm.description }}</p>
+        <p>原详情：{{ originalForm.detail }}</p>
       </el-alert>
 
       <el-form :model="form" label-width="120px" v-loading="loading">
@@ -41,6 +44,28 @@
               :min="0"
               controls-position="right"
           />
+        </el-form-item>
+
+        <el-form-item label="商品评分" prop="rate">
+          <el-rate
+              v-model="form.rate"
+              :max="5"
+              show-score
+              :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+          />
+        </el-form-item>
+
+        <el-form-item
+            label="冻结状态"
+            v-if="originalForm"
+        >
+        <el-switch
+            v-model="form.frozen"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="已冻结"
+            inactive-text="未冻结"
+        />
         </el-form-item>
 
         <el-form-item label="商品描述">
@@ -112,7 +137,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
 import {
   getProduct,
-  updateProduct as updateProductApi, // ✅ 重命名，避免冲突
+  updateProduct as updateProductApi,
   deleteProduct as deleteProductApi,
   type ProductVO,
   type Specification
@@ -130,7 +155,9 @@ const form = ref<ProductVO>({
   description: '',
   cover: '',
   detail: '',
-  specifications: []
+  specifications: [],
+  rate:3,
+  frozen: 0,
 })
 
 // ✅ 保存原始数据
@@ -143,7 +170,8 @@ const loadProduct = async () => {
     const product = res.data
 
     originalForm.value = JSON.parse(JSON.stringify(product))
-
+    form.value.rate = product.rate
+    form.value.frozen = product.frozen
     form.value = {
       ...product,
       specifications: product.specifications || []
@@ -211,7 +239,7 @@ const resetToOriginal = () => {
 }
 
 const goBack = () => {
-  router.push('/home/allproduct')
+  router.push({ name: 'Dashboard' })
 }
 
 onMounted(() => {
@@ -248,5 +276,8 @@ onMounted(() => {
 
 .mb-4 {
   margin-bottom: 20px;
+}
+:deep(.left-align-alert) {
+  text-align: left;
 }
 </style>

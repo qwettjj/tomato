@@ -25,7 +25,6 @@ public class ProductServiceImpl implements ProductService {
         }
         Product newProduct = productVO.toPO();
         newProduct.setRateNum(0);
-        newProduct.setFrozen(0);
         productRepository.save(newProduct);
         return true;
     }
@@ -55,6 +54,11 @@ public class ProductServiceImpl implements ProductService {
         if(productVO.getAmount() != null){
             product.setAmount(productVO.getAmount());
         }
+        if(productVO.getRate()!=null)
+        {
+            product.setRate(productVO.getRate());
+        }
+        product.setFrozen(productVO.getFrozen());
         productRepository.save(product);
         return true;
     }

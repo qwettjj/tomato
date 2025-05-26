@@ -75,7 +75,7 @@ public class OrderServiceImpl implements OrderService {
                     }
                 }
             }
-        }, 30, TimeUnit.MINUTES);
+        }, 1, TimeUnit.MINUTES);
 
 
         return orderRepository.save(order).getOrderId();

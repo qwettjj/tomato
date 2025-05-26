@@ -45,6 +45,27 @@
           ></el-input-number>
         </el-form-item>
 
+        <!-- 商品评分 -->
+        <el-form-item label="商品评分" prop="rate">
+          <el-rate
+              v-model="form.rate"
+              :max="5"
+              show-score
+              :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+          />
+        </el-form-item>
+
+        <!-- 是否冻结 -->
+        <el-form-item label="冻结状态">
+          <el-switch
+              v-model="form.frozen"
+              active-value="1"
+              inactive-value="0"
+              active-text="已冻结"
+              inactive-text="未冻结"
+          />
+        </el-form-item>
+
         <!-- 商品封面 -->
         <el-form-item label="商品封面">
           <el-upload
@@ -184,11 +205,13 @@ const specForm = ref()
 // 表单数据
 const form = ref<Omit<ProductVO, 'id' | 'specifications'>>({
   productName: '',
-  price: 0,
+  price: 1,
   amount: 1,
   description: '',
   cover: '',
-  detail: ''
+  detail: '',
+  rate: 3, // 默认3星
+  frozen: 0, // 默认未冻结
 })
 
 const specificationForm = ref<{ specs: Specification[] }>({
@@ -217,6 +240,9 @@ const rules = {
   ],
   detail: [
     { max: 500, message: '长度不能超过500个字符', trigger: 'blur' }
+  ],
+  rate: [
+    { type: 'number', min: 1, max: 5, message: '评分必须在1-5之间', trigger: 'blur' }
   ]
 }
 
@@ -329,12 +355,7 @@ const submitForm = async () => {
     console.log("即将进入跳转")
     router.push({ path: "/allproduct" })
 
-  // }
-  // catch (error) {
-  //   ElMessage.error(error.response?.data?.message || '创建商品失败')
-  // } finally {
-  //   loading.value = false
-  // }
+
 }
 
 // 重置表单
@@ -447,4 +468,5 @@ h1 {
   background: #f8f9fa;
   border-radius: 4px;
 }
+
 </style>

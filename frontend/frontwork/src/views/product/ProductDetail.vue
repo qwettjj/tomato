@@ -10,90 +10,90 @@
     </div>
 
     <div v-else-if="product" class="product-detail">
-      <el-row :gutter="40">
-        <el-col :span="12">
-          <div class="product-image">
-            <el-image
-                :src="product.cover"
-                :alt="product.productName"
-                fit="contain"
-                style="width: 100%; max-height: 500px;"
-                @error="handleImageError"
+      <!-- 图片和基本信息区域 -->
+      <div class="main-content">
+        <!-- 图片容器 -->
+        <div class="image-wrapper">
+          <el-image
+              :src="product.cover"
+              :alt="product.productName"
+              fit="contain"
+              class="product-image"
+              @error="handleImageError"
+          >
+            <template #error>
+              <div class="image-error">
+                <el-icon><Picture /></el-icon>
+                <span>图片加载失败</span>
+              </div>
+            </template>
+          </el-image>
+        </div>
+
+        <!-- 商品信息 -->
+        <div class="info-wrapper">
+          <h1 class="title">{{ product.productName }}</h1>
+          <div class="meta-info">
+            <div class="price-section">
+              <span class="price">¥{{ formatPrice(product.price) }}</span>
+              <el-tag :type="product.amount > 0 ? 'success' : 'danger'" effect="dark">
+                {{ product.amount > 0 ? `库存 ${product.amount} 件` : '已售罄' }}
+              </el-tag>
+            </div>
+            <el-rate
+                v-model="product.rate"
+                disabled
+                :max="5"
+                allow-half
+                class="rating"
+                :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+            />
+          </div>
+
+          <div class="specifications">
+            <h3>商品规格</h3>
+            <div v-if="product.specifications.length === 0" class="no-spec">
+              暂无规格信息
+            </div>
+            <div
+                v-for="(spec, index) in product.specifications"
+                :key="index"
+                class="spec-item"
             >
-              <template #error>
-                <div class="image-error">
-                  <el-icon><Picture /></el-icon>
-                  <span>图片加载失败</span>
-                </div>
-              </template>
-            </el-image>
-          </div>
-        </el-col>
-        <el-col :span="12">
-          <div class="product-info">
-            <h1 class="title">{{ product.productName }}</h1>
-            <div class="meta-info">
-              <div class="price-section">
-                <span class="price">¥{{ formatPrice(product.price) }}</span>
-                <el-tag :type="product.amount > 0 ? 'success' : 'danger'" effect="dark">
-                  {{ product.amount > 0 ? `库存 ${product.amount} 件` : '已售罄' }}
-                </el-tag>
-              </div>
-              <el-rate
-                  v-model="product.rate"
-                  disabled
-                  :max="10"
-                  allow-half
-                  class="rating"
-                  :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-              />
-            </div>
-
-            <div class="specifications">
-              <h3>商品规格</h3>
-              <div v-if="product.specifications.length === 0" class="no-spec">
-                暂无规格信息
-              </div>
-              <div
-                  v-for="(spec, index) in product.specifications"
-                  :key="index"
-                  class="spec-item"
-              >
-                <span class="spec-label">{{ spec.item }}：</span>
-                <span class="spec-value">{{ spec.value }}</span>
-              </div>
-            </div>
-
-            <div class="description">
-              <h3>商品描述</h3>
-              <p>{{ product.description || '暂无商品描述' }}</p>
-            </div>
-
-            <div class="actions">
-              <el-button
-                  type="primary"
-                  size="large"
-                  @click="addToCart"
-                  :disabled="product.amount <= 0"
-              >
-                加入购物车
-              </el-button>
-              <el-button
-                  type="success"
-                  size="large"
-                  @click="buyNow"
-                  :disabled="product.amount <= 0"
-              >
-                立即购买
-              </el-button>
+              <span class="spec-label">{{ spec.item }}：</span>
+              <span class="spec-value">{{ spec.value }}</span>
             </div>
           </div>
-        </el-col>
-      </el-row>
 
-      <el-divider />
+          <div class="description">
+            <h3>商品描述</h3>
+            <p>{{ product.description || '暂无商品描述' }}</p>
+          </div>
 
-      <div class="product-content">
+          <div class="actions">
+            <el-button
+                type="primary"
+                size="large"
+                @click="addToCart"
+                :disabled="product.amount <= 0"
+            >
+              加入购物车
+            </el-button>
+            <el-button
+                type="success"
+                size="large"
+                @click="buyNow"
+                :disabled="product.amount <= 0"
+            >
+              立即购买
+            </el-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 商品详情区域 -->
+      <div class="detail-content">
+        <el-divider />
         <h3>商品详情</h3>
         <div class="content" v-html="product.detail || '暂无商品详情'"></div>
       </div>
@@ -104,7 +104,6 @@
       <el-button type="primary" @click="$router.push('/home/allproduct')">返回商品列表</el-button>
     </div>
 
-    <!-- 🔥 加入购物车弹窗 -->
     <el-dialog
         v-model="showAddDialog"
         title="选择购买数量"
@@ -126,7 +125,6 @@
     </el-dialog>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -252,60 +250,80 @@ const formatPrice = (price: number | undefined) =>
 
 <style scoped>
 .product-detail-container {
-  padding: 24px;
-  background-color: #fff;
+  padding: 20px;
+  max-width: 1800px;
+  margin: 0 50px;
 }
 
 .breadcrumb {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  text-align: left;
 }
 
 .loading {
-  padding: 40px;
-  text-align: center;
+  padding: 40px 0;
+  text-align: left;
 }
 
 .product-detail {
-  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.main-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  text-align: left;
+}
+
+.image-wrapper {
+  flex: 1;
+  min-width: 300px;
+  max-width: 700px;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent; 
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .product-image {
-  text-align: center;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .image-error {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   color: #999;
-  font-size: 14px;
-  padding: 20px;
+  text-align: left;
 }
 
-.product-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 16px;
+.info-wrapper {
+  flex: 1;
+  min-width: 300px;
+  max-width: 600px;
+  text-align: left;
 }
 
 .title {
   font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 12px;
-}
-
-.meta-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin-bottom: 15px;
+  text-align: left;
 }
 
 .price-section {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
+  margin-bottom: 10px;
+  text-align: left;
 }
 
 .price {
@@ -314,66 +332,44 @@ const formatPrice = (price: number | undefined) =>
   font-weight: bold;
 }
 
-.rating {
-  margin-top: 8px;
-}
-
-.specifications {
+.specifications,
+.description {
   margin-top: 20px;
-}
-
-.specifications h3 {
-  font-size: 18px;
-  margin-bottom: 8px;
+  text-align: left;
 }
 
 .spec-item {
-  margin-bottom: 6px;
-}
-
-.spec-label {
-  font-weight: 500;
-  margin-right: 4px;
-}
-
-.description {
-  margin-top: 20px;
-}
-
-.description h3 {
-  font-size: 18px;
-  margin-bottom: 8px;
-}
-
-.description p {
-  color: #666;
+  margin: 8px 0;
+  text-align: left;
 }
 
 .actions {
-  margin-top: 24px;
+  margin-top: 30px;
   display: flex;
-  gap: 16px;
+  gap: 15px;
+  text-align: left;
 }
 
-.product-content {
-  margin-top: 40px;
-}
-
-.product-content h3 {
-  font-size: 20px;
-  margin-bottom: 12px;
-}
-
-.content {
-  border-top: 1px solid #eee;
-  padding-top: 12px;
-  color: #333;
-  line-height: 1.8;
+.detail-content {
+  width: 100%;
+  margin-top: 20px;
+  text-align: left;
 }
 
 .not-found {
   text-align: center;
-  padding: 60px 0;
+  padding: 40px 0;
 }
 
+@media (max-width: 768px) {
+  .image-wrapper {
+    height: auto;
+    aspect-ratio: 1/1;
+    background: transparent; /* 移动端也改为透明背景 */
+  }
+
+  .main-content {
+    flex-direction: column;
+  }
+}
 </style>

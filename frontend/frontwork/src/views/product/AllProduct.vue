@@ -57,13 +57,16 @@
                     <el-rate
                         v-model="product.rate"
                         disabled
-                        :max="10"
+                        :max="5"
                         :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
                     />
                     <span class="rating-text">{{ product.rate?.toFixed(1) || '暂无' }}</span>
                   </div>
                 </div>
-                <el-tag v-if="product.amount <= 0" type="danger" effect="dark" class="stock-tag">
+                <el-tag v-if="product.frozen==1" type="danger" effect="dark" class="stock-tag">
+                  商品已冻结，停止售卖
+                </el-tag>
+                <el-tag v-else-if="product.amount <= 0" type="danger" effect="dark" class="stock-tag">
                   已售罄
                 </el-tag>
                 <el-tag v-else class="stock-tag">
@@ -103,6 +106,7 @@ interface Product {
   rate?: number
   cover: string
   amount: number
+  frozen:number
 }
 
 // 商品数据
@@ -134,6 +138,7 @@ const fetchProducts = async () => {
         rate: item.rate ?? 0,
         cover: item.cover,
         amount: item.amount,
+        frozen: item.frozen,
       }))
     } else {
       throw new Error('接口返回异常')

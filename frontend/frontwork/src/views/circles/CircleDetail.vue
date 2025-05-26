@@ -789,7 +789,6 @@ onMounted(() => {
   }
 }
 
-/* 对话框样式覆盖 */
 :deep(.el-dialog) {
   border-radius: 12px;
 }

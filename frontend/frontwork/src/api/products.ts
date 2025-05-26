@@ -9,15 +9,15 @@ export type Specification = {
 
 // 商品信息类型（对应 ProductVO）
 export type ProductVO = {
-    id?: number;               // 商品ID（创建时可能无ID）
+    id?: number;               // 商品ID
     productName: string;       // 商品名称
     price: number;             // 价格
-    rate?: number;             // 评分（可选）
+    rate?: number;             // 评分1-5分
     description: string;       // 描述
     cover?: string;             // 封面图URL
-    detail?: string;           // 详情（可选）
+    detail?: string;           // 详情
     amount: number;            // 库存数量
-    frozen?: number;           // 冻结数量（可选）
+    frozen?: number;           //  0-未冻结，1-已冻结
     specifications: Specification[]; // 商品规格集合（数组形式，元素为无 id 的对象）
 }
 
