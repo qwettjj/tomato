@@ -47,5 +47,12 @@ public class TomatoMallException extends RuntimeException {
     public static TomatoMallException noAuthority() {return new TomatoMallException("无权操作");}
 
     public static TomatoMallException isNotAdmin() {return new TomatoMallException("目标不是管理员");}
+
+    public static TomatoMallException orderNotExists() { return new TomatoMallException("订单不存在");}
+
+    public static TomatoMallException historyNotExists() { return new TomatoMallException("购买历史不存在");}
+
+    public static TomatoMallException permissionDenied() { return new TomatoMallException("该用户无权访问");
+    }
 }
 

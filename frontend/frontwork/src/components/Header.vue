@@ -31,6 +31,10 @@ function logout() {
 function toCircles() {
   router.push({path:"/home/circles"})
 }
+
+function toHistory() {
+  router.push({path: "/history"})
+}
 </script>
 
 <template>
@@ -57,10 +61,16 @@ function toCircles() {
         </router-link>
       </el-col>
 
-      <!-- 新增书友圈按钮 -->
+      <!-- 书友圈按钮 -->
       <el-col :span="2" class="header-icon">
         <a @click="toCircles" class="header-link">
           <span class="header-text">书友圈</span>
+        </a>
+      </el-col>
+
+      <el-col :span="2" class="header-icon">
+        <a @click="toHistory" class="header-link">
+          <span class="header-text">购买记录</span>
         </a>
       </el-col>
 

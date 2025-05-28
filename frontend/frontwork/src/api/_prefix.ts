@@ -27,3 +27,6 @@ export const POST_MODULE = `${API_MODULE}/posts`
 
 //书友圈评论模块
 export const COMMENT_MODULE = `${API_MODULE}/comments`
+
+//购买记录
+export const HISTORY_MODULE = `${API_MODULE}/histories`

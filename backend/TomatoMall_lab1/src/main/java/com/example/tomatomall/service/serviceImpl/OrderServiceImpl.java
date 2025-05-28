@@ -5,6 +5,7 @@ import com.example.tomatomall.po.CartItem;
 import com.example.tomatomall.po.Order;
 import com.example.tomatomall.po.Product;
 import com.example.tomatomall.repository.CartItemRepository;
+import com.example.tomatomall.repository.HistoryRepository;
 import com.example.tomatomall.repository.OrderRepository;
 import com.example.tomatomall.repository.ProductRepository;
 import com.example.tomatomall.service.OrderService;
@@ -38,6 +39,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     ProductRepository productRepository;
 
+    @Autowired
+    HistoryRepository historyRepository;
+
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10); // 可配置线程数
 
     @Override
@@ -57,6 +61,7 @@ public class OrderServiceImpl implements OrderService {
                 if (savedOrder.getStatus() == OrderStatuEnum.PENDING) {
                     savedOrder.setStatus(OrderStatuEnum.TIMEOUT);
                     orderRepository.save(savedOrder);
+                    historyRepository.deleteByOrderId(savedOrder.getOrderId());
                     //释放库存
                     if(cartItemId != null) {
                         for(Integer cartItemId_ : cartItemId){

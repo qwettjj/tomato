@@ -194,6 +194,10 @@ const goToModifyProduct = () => {
   }
   router.push(`/modifyproduct/${productId.value}`)
 }
+
+const goToManageAdvertisement = () => {
+  router.push('/manageadvertisement');
+};
 </script>
 
 <template>
@@ -252,6 +256,13 @@ const goToModifyProduct = () => {
           >
             创建商品
           </el-button>
+          <el-button
+              type="success"
+              class="admin-button new-ad-button"
+              @click="goToManageAdvertisement">
+            <i class="el-icon-data-line"></i> 管理广告
+          </el-button>
+
         </div>
       </el-card>
 

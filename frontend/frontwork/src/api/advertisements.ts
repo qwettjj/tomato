@@ -1,4 +1,3 @@
-// src/api/advertisement.ts
 import { axios } from '../utils/request'
 import { ADVERTISEMENT_MODULE } from './_prefix'
 

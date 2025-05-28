@@ -68,20 +68,24 @@ export const getProduct = (id: number) => {
 }
 
 export const rateProduct = (id: number, rate: number) => {
-    return axios.patch<Response<number>>(
-        `${PRODUCT_MODULE}/rate/${id}`, rate
-    ).then(res => res.data)
-}
+    return axios.patch(
+        `${PRODUCT_MODULE}/rate/${id}`,
+        null,
+        {
+            params: { rate }
+        }
+    ).then(res => res.data);
+};
 
 export const freezeProduct = (id: number) => {
-    return axios.patch<Response<boolean>>(
+    return axios.patch<boolean>(
         `${PRODUCT_MODULE}/frozen/${id}`
-    ).then(res => res.data)
+    ).then(res => res.data.data)
 }
 
 export const unfreezeProduct = (id: number) => {
-    return axios.patch<Response<boolean>>(
+    return axios.patch<boolean>(
         `${PRODUCT_MODULE}/unfrozen/${id}`
-    ).then(res => res.data)
+    ).then(res => res.data.data)
 }
 

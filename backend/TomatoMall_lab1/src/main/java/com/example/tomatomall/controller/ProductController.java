@@ -65,7 +65,7 @@ public class ProductController {
     }
 
     @PatchMapping("/rate/{id}")
-    public Response<Integer> rateProduct(@PathVariable Integer id,@RequestBody Integer rate) {
+    public Response<Integer> rateProduct(@PathVariable Integer id,@RequestParam Integer rate) {
         try{
             return Response.buildSuccess(productService.rateProduct(id,rate));
         }catch (TomatoMallException e){

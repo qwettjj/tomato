@@ -146,6 +146,32 @@ const router = createRouter({
             ]
         },
         {
+            path: '/home',
+            redirect: '/history',
+            component: () => import('../views/Home.vue'),
+            children: [
+                {
+                    path: '/history',
+                    name: 'History',
+                    component: () => import('../views/users/History.vue'),
+                    meta: {title: '购买记录'},
+                },
+            ]
+        },
+        {
+            path: '/home',
+            redirect: '/manageadvertisement',
+            component: () => import('../views/Home.vue'),
+            children: [
+                {
+                    path: '/manageadvertisement',
+                    name: 'ManageAdvertisement',
+                    component: () => import('../views/users/ManageAdvertisement.vue'),
+                    meta: {title: '广告管理'},
+                },
+            ]
+        },
+        {
             path: '/404',
             component: () => import('../views/NotFound.vue'),
             meta: { title: '404' }

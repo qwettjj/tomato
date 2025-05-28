@@ -134,6 +134,7 @@ import { getProduct } from '../../api/products'
 import type { ProductVO } from '../../api/products'
 import { addCartItem } from "../../api/cartItem";
 import { createOrderDirectly} from "../../api/orders";
+import { createHistory,type HistoryVO } from "../../api/histories";
 
 
 // 路由相关
@@ -197,6 +198,18 @@ const confirmAddToCart = async () => {
         quantity : selectedQuantity.value
       })
       console.log(createRes.data)
+
+      try {
+        const historyData: HistoryVO = {
+          productId: product.value.id,
+          quantity: selectedQuantity.value,
+          orderId: createRes.data
+        };
+        await createHistory(historyData);
+      } catch (historyError) {
+        console.error('创建历史记录失败:', historyError);
+      }
+
       router.push({
         path: '/order',
         query: {

@@ -104,6 +104,7 @@ import {
 import { getProduct } from '../../api/products';
 import { createOrder } from '../../api/orders';
 import type { CartItem, Product } from '../../types';
+import { createHistory} from "../../api/histories";
 
 const router = useRouter();
 const cartItems = ref<Array<CartItem & { product?: Product; selected: boolean }>>([]);
@@ -257,6 +258,28 @@ const goToCheckout = async () => {
       paymentMethod: "Alipay",
       cartItemId: selectedCartItemIds
     });
+
+    try {
+      // 为每个选中的商品创建历史记录
+      const createHistoryPromises = selectedItems.value.map(async (item) => {
+        if (!item.product) return;
+
+        const historyData = {
+          productId: item.product.id,
+          quantity: item.quantity,
+          orderId: res.data // 使用刚创建的订单ID
+        };
+
+        await createHistory(historyData);
+      });
+
+      await Promise.all(createHistoryPromises);
+      console.log('所有历史记录创建成功');
+    } catch (historyError) {
+      console.error('部分历史记录创建失败:', historyError);
+      // 可以给用户提示，但不中断流程
+      ElMessage.warning('部分历史记录创建失败，但不影响订单');
+    }
 
     console.log(res.data);
     router.push({
