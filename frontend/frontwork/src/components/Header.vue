@@ -51,7 +51,7 @@ function toHistory() {
         <el-tag class="role-tag" size="large">{{ parseRole(role) }}版</el-tag>
       </el-col>
 
-      <el-col :span="10"> <!-- 从12调整为10 -->
+      <el-col :span="8">
       </el-col>
 
       <!-- 购物车链接 -->

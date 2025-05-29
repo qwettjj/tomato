@@ -5,18 +5,21 @@ import { ElMessage, ElLoading } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { userInfo, userUpdate, type updateInfo } from '../../api/accounts'
 import { uploadImage } from '../../api/tool'
-
+import { getAllProducts } from '../../api/products' // 导入获取所有商品的API
+import type { ProductVO } from '../../api/products' // 导入商品类型
 const router = useRouter()
 
 // 用户信息响应式变量
 const userName = ref('')
-const role = ref('' || "ADMIN" )
+const role = ref('' || "ADMIN")
 const phone = ref('')
 const email = ref('')
 const address = ref('')
 const avatar = ref('')
-const productId = ref('')
 
+// 对话框相关
+const showModifyDialog = ref(false)
+const inputProductId = ref('')
 // 编辑状态
 const isEditing = ref(false)
 const editForm = ref({
@@ -27,6 +30,53 @@ const editForm = ref({
   newPassword: '',
   confirmPassword: ''
 })
+const productList = ref<ProductVO[]>([])// 添加商品列表状态
+
+
+// 取消修改商品信息
+const cancelModify = () => {
+  showModifyDialog.value = false
+}
+const fetchAllProducts = async () => {
+  try {
+    const res = await getAllProducts()
+    console.log('API response:', res) // 调试用，可以查看完整响应结构
+    productList.value = res.data // 确保这里提取的是数组
+    console.log('Product list:', productList.value) // 检查提取后的数据
+  } catch (error) {
+    console.error('获取商品列表失败:', error)
+    ElMessage.error('获取商品列表失败')
+  }
+}
+
+// 修改handleModifyClick函数
+const handleModifyClick = async () => {
+  inputProductId.value = ''
+  await fetchAllProducts() // 打开弹窗前获取商品列表
+  showModifyDialog.value = true
+}
+
+// 修改confirmModify函数，添加验证逻辑
+const confirmModify = () => {
+  if (!inputProductId.value) {
+    ElMessage.warning('请输入商品ID')
+    return
+  }
+
+  // 验证ID是否存在
+  const productExists = productList.value.some(
+      product => product.id === Number(inputProductId.value)
+  )
+
+  if (!productExists) {
+    ElMessage.error('商品不存在，请检查ID')
+    return
+  }
+
+  router.push(`/modifyproduct/${inputProductId.value}`)
+  showModifyDialog.value = false
+}
+
 
 // 头像上传相关
 const avatarFile = ref<File | null>(null)
@@ -234,17 +284,9 @@ const goToManageAdvertisement = () => {
         </el-descriptions>
 
         <div v-if="role === 'ADMIN'" class="admin-actions">
-          <div class="product-id-input">
-            <el-input
-                v-model="productId"
-                placeholder="输入商品ID"
-                clearable
-                @keyup.enter="goToModifyProduct"
-            />
-          </div>
           <el-button
               type="primary"
-              @click="goToModifyProduct"
+              @click="handleModifyClick"
               class="admin-button"
           >
             修改商品信息
@@ -259,11 +301,56 @@ const goToManageAdvertisement = () => {
           <el-button
               type="success"
               class="admin-button new-ad-button"
-              @click="goToManageAdvertisement">
+              @click="goToManageAdvertisement"
+          >
             <i class="el-icon-data-line"></i> 管理广告
           </el-button>
-
         </div>
+
+        <el-dialog
+            v-model="showModifyDialog"
+            title="修改商品信息"
+            width="50%"
+            :close-on-click-modal="false"
+        >
+          <div class="modify-dialog-content">
+            <div class="product-list-container">
+              <h4>商品列表 (点击可快速选择)</h4>
+              <el-table
+                  :data="productList"
+                  height="300"
+                  style="width: 100%"
+                  @row-click="(row) => inputProductId = String(row.id)"
+              >
+                <el-table-column prop="id" label="ID" width="100" />
+                <el-table-column prop="productName" label="商品名称" />
+                <el-table-column label="库存">
+                  <template #default="{row}">
+                    <el-tag :type="row.amount > 0 ? 'success' : 'danger'">
+                      {{ row.amount }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+
+            <div class="id-input-container">
+              <el-input
+                  v-model="inputProductId"
+                  placeholder="请输入商品ID"
+                  clearable
+                  @keyup.enter="confirmModify"
+              >
+                <template #prepend>商品ID</template>
+              </el-input>
+            </div>
+          </div>
+
+          <template #footer>
+            <el-button @click="cancelModify">取消</el-button>
+            <el-button type="primary" @click="confirmModify">确认</el-button>
+          </template>
+        </el-dialog>
       </el-card>
 
       <el-card class="edit-card">
@@ -432,6 +519,35 @@ const goToManageAdvertisement = () => {
   align-items: center;
   justify-content: center;
   margin: 0 0 0 0;
+}
+.modify-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.product-list-container {
+  border: 1px solid var(--el-border-color);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.product-list-container h4 {
+  margin: 0 0 10px 0;
+  color: var(--el-text-color-regular);
+}
+
+.id-input-container {
+  margin-top: 10px;
+}
+
+/* 使表格行可点击 */
+:deep(.el-table__row) {
+  cursor: pointer;
+}
+
+:deep(.el-table__row:hover) {
+  background-color: var(--el-color-primary-light-9);
 }
 
 @media (max-width: 992px) {

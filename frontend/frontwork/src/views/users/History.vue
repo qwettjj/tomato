@@ -22,14 +22,6 @@
           </div>
 
           <div class="filter-group">
-            <h4>订单类型</h4>
-            <el-checkbox-group v-model="typeFilter">
-              <el-checkbox label="direct">直接购买</el-checkbox>
-              <el-checkbox label="cart">购物车结算</el-checkbox>
-            </el-checkbox-group>
-          </div>
-
-          <div class="filter-group">
             <h4>价格范围</h4>
             <div class="price-range">
               <el-input-number v-model="minPrice" :min="0" :max="10000" placeholder="最低价" />
@@ -73,10 +65,6 @@
             <el-icon><Delete /></el-icon> 删除选中
           </el-button>
 
-          <el-button @click="clearAll">
-            <el-icon><DeleteFilled /></el-icon> 清空记录
-          </el-button>
-
           <div class="spacer"></div>
 
           <el-input
@@ -109,9 +97,6 @@
                 <div class="order-info">
                   <el-checkbox v-model="record.selected" />
                   <span class="order-id">订单号: {{ record.orderId }}</span>
-                  <el-tag :type="record.type === 'direct' ? 'success' : 'primary'" size="small">
-                    {{ record.type === 'direct' ? '直接购买' : '购物车结算' }}
-                  </el-tag>
                 </div>
                 <div class="order-time">
                   <el-icon><Calendar /></el-icon> {{ formatDate(record.createTime) }}
@@ -142,7 +127,6 @@
                             v-model="record.product.rate"
                             :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
                             disabled
-                            allow-half
                         />
                         <span v-if="record.product.rate" class="rating-text">
                           {{ record.product.rate.toFixed(1) }}
@@ -155,7 +139,6 @@
                         <el-rate
                             v-model="record.userRating"
                             :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                            allow-half
                             @change="handleRate(record)"
                         />
                         <el-button
@@ -222,9 +205,9 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, ref} from 'vue'
-import {useRouter} from 'vue-router'
-import {ElMessage, ElMessageBox} from 'element-plus'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Calendar,
   Clock,
@@ -237,15 +220,15 @@ import {
   SuccessFilled,
   View
 } from '@element-plus/icons-vue'
-import {batchDeleteHistory, clearUserHistory, getUserHistory} from '../../api/histories'
-import {getProduct, rateProduct} from '../../api/products' // 导入 rateProduct
-import type {HistoryVO, ProductVO} from '@/api/types'
+import { batchDeleteHistory, getUserHistory, deleteHistory } from '../../api/histories'
+import { getProduct, rateProduct } from '../../api/products'
+import type { HistoryVO } from '../../api/histories'
+import type { ProductVO } from '../../api/products'
 
 const router = useRouter()
 
 // 筛选条件
 const timeFilter = ref('all')
-const typeFilter = ref(['direct', 'cart'])
 const minPrice = ref<number | null>(null)
 const maxPrice = ref<number | null>(null)
 const searchText = ref('')
@@ -260,15 +243,16 @@ const selectAll = ref(false)
 const isIndeterminate = ref(false)
 
 // 历史记录数据
-const historyRecords = ref<Array<HistoryVO & {
+interface HistoryRecord extends HistoryVO {
   product?: ProductVO;
   selected: boolean;
-  type: 'direct' | 'cart';
-  // 新增评分相关字段
   userRating: number;
   hasRated: boolean;
   isRating: boolean;
-}>>([])
+
+}
+
+const historyRecords = ref<HistoryRecord[]>([])
 
 // 计算属性
 const filteredRecords = computed(() => {
@@ -284,9 +268,6 @@ const filteredRecords = computed(() => {
       if (timeFilter.value === 'month' && daysDiff > 30) return false
       if (timeFilter.value === 'quarter' && daysDiff > 90) return false
     }
-
-    // 类型筛选
-    if (!typeFilter.value.includes(record.type)) return false
 
     // 价格筛选
     const totalPrice = calculateTotal(record)
@@ -330,7 +311,7 @@ const formatDate = (dateString?: string) => {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
 }
 
-const calculateTotal = (record: any) => {
+const calculateTotal = (record: HistoryRecord) => {
   if (!record.product?.price) return 0
   return record.product.price * record.quantity
 }
@@ -348,7 +329,6 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   timeFilter.value = 'all'
-  typeFilter.value = ['direct', 'cart']
   minPrice.value = null
   maxPrice.value = null
   searchText.value = ''
@@ -361,6 +341,11 @@ const viewProduct = (productId?: number) => {
 }
 
 const deleteRecord = async (id: number) => {
+  if (!id) {
+    ElMessage.error('无效的历史记录ID');
+    return;
+  }
+
   try {
     await ElMessageBox.confirm('确定删除这条购买记录吗？', '提示', {
       confirmButtonText: '确定',
@@ -368,14 +353,14 @@ const deleteRecord = async (id: number) => {
       type: 'warning'
     })
 
-    // 实际API调用 - 这里需要实现单条删除API
-    // await deleteHistory(id)
-
-    // 临时前端删除
+    await deleteHistory(id)
     historyRecords.value = historyRecords.value.filter(record => record.historyId !== id)
     ElMessage.success('记录已删除')
   } catch (error) {
-    // 用户取消了操作
+    if (error !== 'cancel') {
+      console.error('删除记录失败:', error)
+      ElMessage.error(error.message || '删除失败，请稍后重试')
+    }
   }
 }
 
@@ -383,74 +368,45 @@ const batchDelete = async () => {
   if (selectedRecords.value.length === 0) return
 
   try {
-    await ElMessageBox.confirm(`确定删除选中的 ${selectedRecords.value.length} 条记录吗？`, '提示', {
+    await ElMessageBox.confirm(`确定删除选中的记录吗？`, '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
 
-    const selectedIds = selectedRecords.value.map(r => r.historyId)
-
-    // 调用批量删除API
-    await batchDeleteHistory(selectedIds as number[])
-
-    // 更新数据
+    const selectedIds = selectedRecords.value.map(r => r.historyId) as number[]
+    await batchDeleteHistory(selectedIds)
     await fetchHistoryData()
-
-    ElMessage.success(`已删除 ${selectedRecords.value.length} 条记录`)
+    ElMessage.success(`已全部删除`)
     selectAll.value = false
   } catch (error) {
-    // 用户取消了操作
+    if (error !== 'cancel') {
+      ElMessage.error('批量删除失败')
+    }
   }
 }
 
-const clearAll = async () => {
-  try {
-    await ElMessageBox.confirm('确定清空所有购买记录吗？', '警告', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'error'
-    })
 
-    // 调用清空API
-    await clearUserHistory()
-
-    // 更新数据
-    await fetchHistoryData()
-
-    ElMessage.success('所有记录已清空')
-  } catch (error) {
-    // 用户取消了操作
-  }
-}
 
 const goShopping = () => {
   router.push('/allproduct')
 }
 
-// 处理评分变化
-const handleRate = (record: any) => {
-  // 当用户选择评分时自动提交
-  // 如果您希望用户手动点击提交按钮，可以移除这部分
+const handleRate = (record: HistoryRecord) => {
   if (record.userRating > 0) {
     submitRating(record)
   }
 }
 
-// 提交评分
-const submitRating = async (record: any) => {
+const submitRating = async (record: HistoryRecord) => {
   try {
     record.isRating = true
-
-    // 调用评分API
     await rateProduct(record.productId, record.userRating)
 
-    // 更新本地数据
     if (record.product) {
       record.product.rate = record.userRating
     }
     record.hasRated = true
-
     ElMessage.success('评分提交成功！')
   } catch (error) {
     console.error('评分失败:', error)
@@ -460,62 +416,59 @@ const submitRating = async (record: any) => {
   }
 }
 
-// 获取历史记录数据
 const fetchHistoryData = async () => {
   try {
-    loading.value = true;
+    loading.value = true
+    const historyResponse = await getUserHistory()
+    console.log("historyResponse:"+historyResponse)
+    // 假设返回的是数组格式
 
-    // 获取历史记录
-    const historyResponse = await getUserHistory();
-    const historyData = historyResponse.data; // 假设历史记录在 data 属性中
+    const historyData = Array.isArray(historyResponse) ? historyResponse : historyResponse.data
+    console.log("historyData:"+historyData)
+    console.log("historyResponse:"+historyResponse)
 
-    // 获取每个历史记录对应的商品信息
     const recordsWithProducts = await Promise.all(historyData.map(async (record: HistoryVO) => {
+      if (!record.historyId) {
+        console.warn('发现没有 historyId 的记录:', record)
+        record.historyId = Date.now()
+      }
       try {
-        const productResponse = await getProduct(record.productId);
-
-        // 从响应中提取商品数据
-        const product = productResponse.data; // 或者 productResponse.data.data，具体取决于实际结构
-
-        // 确保 product 对象存在
-        if (!product) {
-          throw new Error(`未获取到商品 ${record.productId} 的信息`);
-        }
+        const productResponse = await getProduct(record.productId)
+        const product = productResponse.data || productResponse
 
         return {
           ...record,
           product,
           selected: false,
-          type: record.orderId ? 'cart' : 'direct',
-          // 新增评分相关字段
-          userRating: product.rate || 0, // 使用商品已有的评分
-          hasRated: false, // 初始化为未评分状态
-          isRating: false // 是否正在提交评分
-        };
+          userRating: product.rate || 0,
+          hasRated: false,
+          isRating: false
+        }
+        historyRecords.value = recordsWithProducts
       } catch (error) {
-        console.error(`无法获取商品 ${record.productId} 的信息`, error);
+        console.error(`无法获取商品 ${record.productId} 的信息`, error)
         return {
           ...record,
-          product: null,
+          product: undefined,
           selected: false,
-          type: 'direct',
           userRating: 0,
           hasRated: false,
           isRating: false
-        };
+        }
       }
-    }));
+    })
+    )
 
-    historyRecords.value = recordsWithProducts;
+    historyRecords.value = recordsWithProducts
   } catch (error) {
-    console.error('获取历史记录失败:', error);
-    ElMessage.error('获取历史记录失败，请稍后重试');
+    console.error('获取历史记录失败:', error)
+    ElMessage.error('获取历史记录失败，请稍后重试')
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
-// 初始化
+
 onMounted(() => {
   fetchHistoryData()
 })
@@ -730,7 +683,6 @@ onMounted(() => {
   margin: 0 0 10px 0;
 }
 
-/* 评分区域样式 */
 .rating-section {
   margin-bottom: 12px;
 }
@@ -848,7 +800,6 @@ onMounted(() => {
   min-height: 500px;
 }
 
-/* 响应式设计 */
 @media (max-width: 992px) {
   .content-wrapper {
     flex-direction: column;

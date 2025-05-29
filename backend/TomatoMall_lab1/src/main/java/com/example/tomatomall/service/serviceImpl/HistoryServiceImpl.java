@@ -12,10 +12,12 @@ import com.example.tomatomall.util.SecurityUtil;
 import com.example.tomatomall.vo.HistoryVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,7 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     @Override
+    @Transactional
     public boolean deleteHistory(Integer historyId) {
         if(historyRepository.existsById(historyId)) {
             historyRepository.deleteById(historyId);
@@ -59,17 +62,35 @@ public class HistoryServiceImpl implements HistoryService {
     public List<HistoryVO> getUserHistory() {
         Integer accountId = securityUtil.getCurrentAccount().getId();
         List<History> histories = historyRepository.findByUserId(accountId);
-        for(History history : histories){
-            if(!orderRepository.existsById(history.getOrderId())) {
-                histories.remove(history);
+
+        // 使用迭代器遍历，安全删除元素
+        Iterator<History> iterator = histories.iterator();
+        while (iterator.hasNext()) {
+            History history = iterator.next();
+
+            // 检查订单是否存在
+            if (!orderRepository.existsById(history.getOrderId())) {
+                iterator.remove(); // 使用迭代器的remove方法
+                continue;
             }
+
+            // 检查订单状态
             Order order = orderRepository.findById(history.getOrderId()).get();
-            if(order.getStatus() != OrderStatuEnum.SUCCESS){
-                histories.remove(history);
+            if (order.getStatus() != OrderStatuEnum.SUCCESS) {
+                iterator.remove(); // 使用迭代器的remove方法
             }
         }
-
-        return histories.stream().map(History::toVo).collect(Collectors.toList());
+// 确保转换后的 VO 包含 historyId
+        return histories.stream()
+                .map(history -> {
+                    HistoryVO vo = history.toVo();
+                    // 确保 ID 被设置
+                    if (vo.getHistoryId() == null) {
+                        vo.setHistoryId(history.getHistoryId());
+                    }
+                    return vo;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

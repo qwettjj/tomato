@@ -143,7 +143,7 @@ const initOrder = async () => {
 
   } catch (error) {
     ElMessage.error(`订单初始化失败: ${(error as Error).message}`)
-    await router.push('/home')
+    await router.push('/history')
   }
 }
 
@@ -175,7 +175,7 @@ const handlePayment = async () => {
               }
             }
           }
-          router.push('/home')
+          router.push('/history')
         } else if (latestStatus === 'TIMEOUT') {
           clearInterval(pollIntervalId!)
           ElMessage.warning('支付超时，请检查支付结果')
