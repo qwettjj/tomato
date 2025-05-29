@@ -346,6 +346,8 @@ const deleteRecord = async (id: number) => {
     return;
   }
 
+  console.log(id)
+
   try {
     await ElMessageBox.confirm('确定删除这条购买记录吗？', '提示', {
       confirmButtonText: '确定',
@@ -430,7 +432,7 @@ const fetchHistoryData = async () => {
     const recordsWithProducts = await Promise.all(historyData.map(async (record: HistoryVO) => {
       if (!record.historyId) {
         console.warn('发现没有 historyId 的记录:', record)
-        record.historyId = Date.now()
+        // record.historyId = Date.now()
       }
       try {
         const productResponse = await getProduct(record.productId)

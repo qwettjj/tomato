@@ -11,7 +11,7 @@ const router = useRouter()
 
 // 用户信息响应式变量
 const userName = ref('')
-const role = ref('' || "ADMIN")
+const role = ref('' || "USER")
 const phone = ref('')
 const email = ref('')
 const address = ref('')

@@ -226,7 +226,7 @@ const rules = {
   ],
   price: [
     { required: true, message: '请输入商品价格', trigger: 'blur' },
-    { type: 'number', min: 0, message: '价格不能小于0', trigger: 'blur' }
+    { type: 'number', min: 1, message: '价格不能小于1.00', trigger: 'blur' }
   ],
   amount: [
     { required: true, message: '请输入商品数量', trigger: 'blur' },

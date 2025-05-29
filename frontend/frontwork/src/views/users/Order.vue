@@ -179,11 +179,11 @@ const handlePayment = async () => {
         } else if (latestStatus === 'TIMEOUT') {
           clearInterval(pollIntervalId!)
           ElMessage.warning('支付超时，请检查支付结果')
-          router.push('/home')
+          router.push('/history')
         } else if(latestStatus === 'FAILURE') {
           clearInterval(pollIntervalId!)
           ElMessage.warning('支付失败')
-          router.push('/home')
+          router.push('/history')
         }
       } catch (error) {
         ElMessage.error('状态查询失败')
