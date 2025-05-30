@@ -18,6 +18,9 @@ export const createHistory = (historyData: HistoryVO) => {
 
 // 删除历史记录
 export const deleteHistory = (historyId: number) => {
+    if (!historyId) {
+        return Promise.reject(new Error('无效的历史记录ID'));
+    }
     return axios.delete(`${HISTORY_MODULE}/${historyId}`)
         .then(res => res.data)
 }
@@ -25,7 +28,7 @@ export const deleteHistory = (historyId: number) => {
 // 获取当前用户的历史记录列表
 export const getUserHistory = () => {
     return axios.get(`${HISTORY_MODULE}/getUserHistory`)
-        .then(res => res.data)
+        .then(res => res.data.data)
 }
 
 // 获取指定历史记录详情

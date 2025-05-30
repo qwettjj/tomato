@@ -87,6 +87,15 @@
             >
               立即购买
             </el-button>
+            <!-- 新增的修改商品按钮，仅管理员可见 -->
+            <el-button
+                v-if="isAdmin"
+                type="warning"
+                size="large"
+                @click="modifyProduct"
+            >
+              修改商品
+            </el-button>
           </div>
         </div>
       </div>
@@ -126,7 +135,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Picture } from '@element-plus/icons-vue'
@@ -255,7 +264,16 @@ onMounted(() => {
   }
   fetchProductDetail()
 })
+// 判断是否为管理员
+const isAdmin = computed(() => {
+  return sessionStorage.getItem('role') === 'ADMIN'
+})
 
+// 修改商品跳转逻辑
+const modifyProduct = () => {
+  if (!product.value) return
+  router.push(`/modifyproduct/${product.value.id}`)
+}
 // 格式化价格
 const formatPrice = (price: number | undefined) =>
     typeof price === 'number' ? price.toFixed(2) : '暂无'

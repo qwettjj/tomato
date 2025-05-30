@@ -42,16 +42,13 @@ function toHistory() {
     <el-row :gutter="10">
 
       <el-col :span="3" class="header-icon">
-        <router-link to="/dashboard" v-slot="{navigate}" class="no-link">
+        <router-link to="/history" v-slot="{navigate}" class="no-link">
           <h1 @click="navigate" class="header-text"> 吃饱饱在线购物</h1>
         </router-link>
       </el-col>
 
-      <el-col :span="2">
-        <el-tag class="role-tag" size="large">{{ parseRole(role) }}版</el-tag>
-      </el-col>
 
-      <el-col :span="10"> <!-- 从12调整为10 -->
+      <el-col :span="10">
       </el-col>
 
       <!-- 购物车链接 -->

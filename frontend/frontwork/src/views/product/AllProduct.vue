@@ -1,5 +1,22 @@
 <template>
   <div class="product-home">
+    <!-- 新增搜索栏 -->
+    <div class="search-container">
+      <el-autocomplete
+          v-model="searchQuery"
+          :fetch-suggestions="searchProducts"
+          placeholder="搜索商品名称"
+          clearable
+          @select="handleSearchSelect"
+          @keyup.enter="handleSearch"
+      >
+        <template #prefix>
+          <el-icon><search /></el-icon>
+        </template>
+      </el-autocomplete>
+      <el-button type="primary" @click="handleSearch" :icon="Search" />
+    </div>
+
     <!-- 广告轮播模块 -->
     <div class="ad-container">
       <el-carousel :interval="5000" height="400px" arrow="always">
@@ -9,12 +26,18 @@
               class="ad-link"
               @click.prevent="handleAdClick(ad)"
           >
-            <img
-                :src="ad.image"
-                :alt="ad.alt"
-                class="ad-image"
-                @error="handleAdImageError"
-            />
+            <div class="ad-content">
+              <img
+                  :src="ad.image"
+                  :alt="ad.alt"
+                  class="ad-image"
+                  @error="handleAdImageError"
+              />
+              <div class="ad-text-overlay">
+                <h2 class="ad-title">{{ ad.title }}</h2>
+                <p class="ad-description">{{ ad.content }}</p>
+              </div>
+            </div>
           </router-link>
         </el-carousel-item>
       </el-carousel>
@@ -34,7 +57,7 @@
 
       <el-row :gutter="20">
         <el-col
-            v-for="product in products"
+            v-for="product in filteredProducts"
             :key="product.id"
             :span="6"
             class="product-col"
@@ -93,11 +116,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getAllProducts } from '../../api/products'
 import { fetchAllAdvertisements } from '../../api/advertisements'
 import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 
 interface Product {
   id: number
@@ -111,9 +135,11 @@ interface Product {
 
 // 商品数据
 const products = ref<Product[]>([])
+const filteredProducts = ref<Product[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const router = useRouter()
+const searchQuery = ref('')
 
 // 广告数据
 const ads = ref<Array<{
@@ -121,7 +147,48 @@ const ads = ref<Array<{
   image: string
   link: string
   alt: string
+  title: string
+  content: string
 }>>([])
+
+// 搜索功能
+const searchProducts = async (query: string, cb: (suggestions: Array<{ value: string }>) => void) => {
+  if (!query) {
+    filteredProducts.value = [...products.value]
+    return cb([])
+  }
+
+  try {
+    const res = await getAllProducts()
+    if (res.code === '200' && Array.isArray(res.data)) {
+      const suggestions = res.data
+          .filter(item => item.productName.includes(query))
+          .map(item => ({ value: item.productName }))
+      cb(suggestions)
+    } else {
+      cb([])
+    }
+  } catch (err) {
+    console.error('搜索失败:', err)
+    cb([])
+  }
+}
+
+const handleSearch = () => {
+  if (!searchQuery.value.trim()) {
+    filteredProducts.value = [...products.value]
+    return
+  }
+
+  filteredProducts.value = products.value.filter(product =>
+      product.productName.includes(searchQuery.value)
+  )
+}
+
+const handleSearchSelect = (item: { value: string }) => {
+  searchQuery.value = item.value
+  handleSearch()
+}
 
 // 获取商品数据
 const fetchProducts = async () => {
@@ -140,6 +207,7 @@ const fetchProducts = async () => {
         amount: item.amount,
         frozen: item.frozen,
       }))
+      filteredProducts.value = [...products.value]
     } else {
       throw new Error('接口返回异常')
     }
@@ -160,7 +228,9 @@ const fetchAds = async () => {
         id: ad.advertisementId || Date.now(),
         image: ad.imageUrl || require('@/assets/default-ad.jpg'),
         link: ad.productId ? `/productdetail/${ad.productId}` : '#',
-        alt: ad.title || '广告图片'
+        alt: ad.title || '广告图片',
+        title: ad.title || '广告标题',
+        content: ad.content || '这里是广告描述内容'
       }))
     }
   } catch (err) {
@@ -169,7 +239,9 @@ const fetchAds = async () => {
       id: 1,
       image: require('@/assets/default-ad.jpg'),
       link: '#',
-      alt: '默认广告'
+      alt: '默认广告',
+      title: '默认广告标题',
+      content: '这里是默认广告描述内容'
     }]
   }
 }
@@ -202,13 +274,26 @@ onMounted(() => {
 })
 </script>
 
-
 <style scoped>
 .product-home {
   padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1600px;
+  margin: 0 50px;
   min-height: 80vh;
+}
+
+/* 新增搜索栏样式 */
+.search-container {
+  display: flex;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-container .el-autocomplete {
+  flex-grow: 1;
 }
 
 /* 广告模块样式 */
@@ -217,6 +302,12 @@ onMounted(() => {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ad-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .ad-link {
@@ -232,6 +323,29 @@ onMounted(() => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+}
+
+.ad-text-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.ad-title {
+  font-size: 28px;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.ad-description {
+  font-size: 16px;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .ad-link:hover .ad-image {

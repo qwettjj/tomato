@@ -33,30 +33,31 @@
             <h3>{{ item.product?.productName || '商品加载中...' }}</h3>
             <p class="description">{{ item.product?.description || '暂无描述' }}</p>
             <p v-if="!item.product" class="loading-text">正在加载商品信息...</p>
+            <p v-if="item.product && item.product.amount <= 0" class="sold-out">商品已售罄</p>
           </div>
         </div>
         <div class="price">¥{{ item.product?.price?.toFixed(2) || '0.00' }}</div>
         <div class="quantity">
           <button
               @click="updateQuantity(item, -1)"
-              :disabled="item.quantity <= 1 || !item.product"
+              :disabled="item.product?.amount <= 0 || !item.product || item.quantity <= 1"
           >-</button>
           <input
               type="number"
               v-model.number="item.quantity"
               min="1"
-              @change="e => {
-                const value = parseInt(e.target.value)
-                if (value > item.product?.amount) {
-                  item.quantity = item.product?.amount || 1
-                }
-              }"
-              :disabled="!item.product"
               :max="item.product?.amount"
+              @change="e => {
+        const value = parseInt(e.target.value)
+        if (value > item.product?.amount) {
+          item.quantity = item.product?.amount || 1
+        }
+      }"
+              :disabled="item.product?.amount <= 0 || !item.product"
           >
           <button
               @click="updateQuantity(item, 1)"
-              :disabled="!item.product || item.quantity >= item.product?.amount"
+              :disabled="item.product?.amount <= 0 || !item.product || item.quantity >= item.product?.amount"
           >+</button>
         </div>
         <div class="subtotal">
@@ -128,10 +129,12 @@ const selectedTotalAmount = computed(() =>
     }, 0)
 );
 
-const canCheckout = computed(() =>
-    selectedItems.value.length > 0 && allProductsLoaded.value
-);
 
+const canCheckout = computed(() =>
+    selectedItems.value.length > 0 &&
+    allProductsLoaded.value &&
+    selectedItems.value.every(item => item.product?.amount > 0)
+);
 // 加载购物车数据
 const loadCart = async () => {
   try {
@@ -247,6 +250,11 @@ const removeItem = async (cartItemId: number) => {
 
 // 结算功能
 const goToCheckout = async () => {
+  const soldOutItems = selectedItems.value.filter(item => item.product?.amount <= 0);
+  if (soldOutItems.length > 0) {
+    ElMessage.warning('部分商品已售罄，请移除后再结算');
+    return;
+  }
   try {
     const selectedCartItemIds = selectedItems.value
         .filter(item => !!item.cartItemId) // 添加过滤确保有效ID
@@ -259,34 +267,37 @@ const goToCheckout = async () => {
       cartItemId: selectedCartItemIds
     });
 
-    try {
-      // 为每个选中的商品创建历史记录
-      const createHistoryPromises = selectedItems.value.map(async (item) => {
-        if (!item.product) return;
+    if(res.data != null)
+    {
+      console.log(res.data)
+      try {
+        // 为每个选中的商品创建历史记录
+        const createHistoryPromises = selectedItems.value.map(async (item) => {
+          if (!item.product) return;
 
-        const historyData = {
-          productId: item.product.id,
-          quantity: item.quantity,
-          orderId: res.data // 使用刚创建的订单ID
-        };
+          const historyData = {
+            productId: item.product.id,
+            quantity: item.quantity,
+            orderId: res.data // 使用刚创建的订单ID
+          };
 
-        await createHistory(historyData);
-      });
+          await createHistory(historyData);
+        });
 
-      await Promise.all(createHistoryPromises);
-      console.log('所有历史记录创建成功');
-    } catch (historyError) {
-      console.error('部分历史记录创建失败:', historyError);
-      // 可以给用户提示，但不中断流程
-      ElMessage.warning('部分历史记录创建失败，但不影响订单');
+        await Promise.all(createHistoryPromises);
+        console.log('所有历史记录创建成功');
+      } catch (historyError) {
+        console.error('部分历史记录创建失败:', historyError);
+        // 可以给用户提示，但不中断流程
+        ElMessage.warning('部分历史记录创建失败，但不影响订单');
+      }
     }
-
     console.log(res.data);
     router.push({
       path: '/order',
       query: {
         orderId: res.data,
-        isDirect : false,
+        isDirect: false,
         amount: selectedTotalAmount.value.toFixed(2),
         cartItemIds: selectedCartItemIds
       }
