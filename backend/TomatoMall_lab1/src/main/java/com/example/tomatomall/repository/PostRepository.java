@@ -8,7 +8,5 @@ import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Integer> {
     List<Post> findByCircleIdAndStatus(Integer circleId, Integer status);
-    List<Post> findByAccountIdAndStatus(Integer accountId, Integer status);
-    Optional<Post> findByPostIdAndStatus(Integer postId, Integer status);
     List<Post> findByCircleId(Integer circleId);
 }

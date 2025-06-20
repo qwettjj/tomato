@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+//更新用户信息
 @Service
 public class AccountFieldUpdater {
     private final Map<String, BiConsumer<Account, Object>> fieldUpdaters = new HashMap<>();

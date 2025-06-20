@@ -90,28 +90,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Integer rateProduct(Integer productId,Integer rate){
-        Product product = productRepository.findById(productId)
-                .orElseThrow(TomatoMallException::productNotFound);
+        // 使用SQL原子操作
+        productRepository.updateRating(productId, rate);
 
-        // 防御性检查评分值
-        if (rate == null || rate < 1 || rate > 5) {
-            throw new IllegalArgumentException("评分值必须在1-5之间");
-        }
-
-        // 安全处理初始评分
-        int currentRate = Optional.ofNullable(product.getRate()).orElse(0);
-        int currentRateNum = Optional.ofNullable(product.getRateNum()).orElse(0);
-
-        // 计算新评分
-        int newRateNum = currentRateNum + 1;
-        int newRate = (currentRate * currentRateNum + rate) / newRateNum;
-
-        // 更新产品
-        product.setRate(newRate);
-        product.setRateNum(newRateNum);
-        productRepository.save(product);
-
-        return newRate;
+        // 返回最新评分
+        return productRepository.getRating(productId);
     }
 
     @Override

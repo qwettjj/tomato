@@ -61,35 +61,9 @@ public class HistoryServiceImpl implements HistoryService {
     @Override
     public List<HistoryVO> getUserHistory() {
         Integer accountId = securityUtil.getCurrentAccount().getId();
-        List<History> histories = historyRepository.findByUserId(accountId);
-
-        // 使用迭代器遍历，安全删除元素
-        Iterator<History> iterator = histories.iterator();
-        while (iterator.hasNext()) {
-            History history = iterator.next();
-
-            // 检查订单是否存在
-            if (!orderRepository.existsById(history.getOrderId())) {
-                iterator.remove(); // 使用迭代器的remove方法
-                continue;
-            }
-
-            // 检查订单状态
-            Order order = orderRepository.findById(history.getOrderId()).get();
-            if (order.getStatus() != OrderStatuEnum.SUCCESS) {
-                iterator.remove(); // 使用迭代器的remove方法
-            }
-        }
-// 确保转换后的 VO 包含 historyId
-        return histories.stream()
-                .map(history -> {
-                    HistoryVO vo = history.toVo();
-                    // 确保 ID 被设置
-                    if (vo.getHistoryId() == null) {
-                        vo.setHistoryId(history.getHistoryId());
-                    }
-                    return vo;
-                })
+        return historyRepository.findValidHistories(accountId, OrderStatuEnum.SUCCESS)
+                .stream()
+                .map(History::toVo)
                 .collect(Collectors.toList());
     }
 
