@@ -223,7 +223,7 @@ const deleteProduct = () => {
     try {
       await deleteProductApi(id)
       ElMessage.success('商品已删除')
-      router.push('/home/allproduct')
+      await router.push({name : 'AllProduct'})
     } catch (error) {
       ElMessage.error('删除失败')
     }

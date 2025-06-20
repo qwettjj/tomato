@@ -10,7 +10,6 @@ import com.example.tomatomall.config.AliPayConfig;
 import com.example.tomatomall.enums.OrderStatuEnum;
 import com.example.tomatomall.po.Order;
 import com.example.tomatomall.repository.OrderRepository;
-import org.bouncycastle.util.encoders.UTF8;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -84,10 +83,10 @@ public class AliPayController {
             String content = AlipaySignature.getSignCheckContentV1(params);
             boolean checkSignature = AlipaySignature.rsa256CheckContent(content,sign,aliPayConfig.getAliPayPublicKey(), "UTF-8");
             if(checkSignature){
-                String tradeNo = params.get("trade_no");
-                Order orders = orderRepository.findById(Integer.parseInt(tradeNo)).get();
-                orders.setStatus(OrderStatuEnum.SUCCESS);
-                orderRepository.save(orders);
+                String tradeNo = params.get("out_trade_no");
+                Order order = orderRepository.findById(Integer.parseInt(tradeNo)).get();
+                order.setStatus(OrderStatuEnum.SUCCESS);
+                orderRepository.save(order);
             }
         }
     }

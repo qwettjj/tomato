@@ -4,6 +4,7 @@ import com.example.tomatomall.exception.TomatoMallException;
 import com.example.tomatomall.po.Account;
 import com.example.tomatomall.repository.AccountRepository;
 import com.example.tomatomall.service.AccountService;
+import com.example.tomatomall.service.serviceImpl.tools.AccountFieldUpdater;
 import com.example.tomatomall.util.SecurityUtil;
 import com.example.tomatomall.util.TokenUtil;
 import com.example.tomatomall.vo.AccountVO;
@@ -12,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.Date;
 
 @Service
@@ -32,6 +32,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     HttpServletRequest httpServletRequest;
+
+    @Autowired
+    AccountFieldUpdater accountFieldUpdater;
 
     @Override
     public Boolean register(AccountVO accountVO) {
@@ -65,22 +68,14 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Boolean updateAccount(AccountVO accountVO) {
         Account account = accountRepository.findByPhone(accountVO.getPhone());
-        if (account == null) {
-            throw TomatoMallException.accountNotFound();
-        }
-        if(accountVO.getPassword()!=null) {
-            String newPassword = passwordEncoder.encode(accountVO.getPassword());
-            account.setPassword(newPassword);
-        }
-        if(accountVO.getUserName()!=null) {
-            account.setUserName(accountVO.getUserName());
-        }
-        if(accountVO.getAddress()!=null) {
-            account.setAddress(accountVO.getAddress());
-        }
-        if(accountVO.getAvatar()!=null) {
-            account.setAvatar(accountVO.getAvatar());
-        }
+        if (account == null) throw TomatoMallException.accountNotFound();
+
+        // 使用表查询更新字段
+        accountFieldUpdater.updateField(account, "password", accountVO.getPassword());
+        accountFieldUpdater.updateField(account, "userName", accountVO.getUserName());
+        accountFieldUpdater.updateField(account, "address", accountVO.getAddress());
+        accountFieldUpdater.updateField(account, "avatar", accountVO.getAvatar());
+
         accountRepository.save(account);
         return true;
     }

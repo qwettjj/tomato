@@ -35,7 +35,7 @@ public class CommentController {
     }
 
     @PostMapping("/delete/{commentId}")
-    public Response<Boolean> deletePost(@PathVariable Integer commentId) {
+    public Response<Boolean> deleteComment(@PathVariable Integer commentId) {
         try{
             return Response.buildSuccess(commentService.deleteComment(commentId));
         }catch (TomatoMallException e){
