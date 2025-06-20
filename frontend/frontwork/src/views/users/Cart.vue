@@ -34,6 +34,7 @@
             <p class="description">{{ item.product?.description || '暂无描述' }}</p>
             <p v-if="!item.product" class="loading-text">正在加载商品信息...</p>
             <p v-if="item.product && item.product.amount <= 0" class="sold-out">商品已售罄</p>
+            <p v-if="item.product?.frozen === 1" class="frozen-text">商品已下架</p>
           </div>
         </div>
         <div class="price">¥{{ item.product?.price?.toFixed(2) || '0.00' }}</div>
@@ -133,7 +134,10 @@ const selectedTotalAmount = computed(() =>
 const canCheckout = computed(() =>
     selectedItems.value.length > 0 &&
     allProductsLoaded.value &&
-    selectedItems.value.every(item => item.product?.amount > 0)
+    selectedItems.value.every(item =>
+        item.product?.amount > 0 &&
+        item.product?.frozen !== 1
+    )
 );
 // 加载购物车数据
 const loadCart = async () => {
@@ -547,6 +551,11 @@ h1 {
   font-size: 12px;
   font-style: italic;
 }
+.frozen-text {
+  color: #ff4757;
+  font-size: 13px;
+  margin-top: 4px;
+}
 
 /* 响应式设计 */
 @media (max-width: 768px) {
@@ -585,6 +594,7 @@ h1 {
     text-align: left;
     padding: 5px;
   }
+
 
   .checkout-btn {
     width: 100%;

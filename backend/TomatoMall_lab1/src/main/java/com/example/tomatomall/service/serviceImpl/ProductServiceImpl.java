@@ -59,6 +59,10 @@ public class ProductServiceImpl implements ProductService {
         {
             product.setRate(productVO.getRate());
         }
+        if(productVO.getSpecifications()!=null)
+        {
+            product.setSpecifications(productVO.getSpecifications());
+        }
         product.setFrozen(productVO.getFrozen());
         productRepository.save(product);
         return true;

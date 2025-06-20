@@ -130,16 +130,28 @@ const confirmLoading = ref(false)
 // 获取所有商品
 const fetchProducts = async () => {
   try {
-    loading.value = true
-    const res = await getAllProducts()
-    products.value = Array.isArray(res) ? res : res.data
+    loading.value = true;
+    const res = await getAllProducts();
+
+    // 处理可能的响应结构（res 或 res.data）
+    const rawData = Array.isArray(res) ? res : res.data;
+
+    // 使用 Map 去重（ID 作为键）
+    const productMap = new Map();
+    rawData.forEach(product => {
+      if (!productMap.has(product.id)) {
+        productMap.set(product.id, product);
+      }
+    });
+
+    products.value = Array.from(productMap.values());
   } catch (error) {
-    ElMessage.error('获取商品列表失败')
-    console.error(error)
+    ElMessage.error('获取商品列表失败');
+    console.error(error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 获取所有广告
 const fetchAdvertisements = async () => {

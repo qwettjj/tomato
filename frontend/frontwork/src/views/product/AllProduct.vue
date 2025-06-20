@@ -151,8 +151,8 @@ const ads = ref<Array<{
   content: string
 }>>([])
 
-// 搜索功能
-const searchProducts = async (query: string, cb: (suggestions: Array<{ value: string }>) => void) => {
+// 搜索功能（带ID去重）
+const searchProducts = async (query: string, cb: (suggestions: Array<{ value: string, id: number }>) => void) => {
   if (!query) {
     filteredProducts.value = [...products.value]
     return cb([])
@@ -161,9 +161,22 @@ const searchProducts = async (query: string, cb: (suggestions: Array<{ value: st
   try {
     const res = await getAllProducts()
     if (res.code === '200' && Array.isArray(res.data)) {
-      const suggestions = res.data
-          .filter(item => item.productName.includes(query))
-          .map(item => ({ value: item.productName }))
+      // 使用Map实现ID去重
+      const uniqueProducts = new Map<number, any>()
+
+      res.data.forEach(product => {
+        if (!uniqueProducts.has(product.id) && product.productName.includes(query)) {
+          uniqueProducts.set(product.id, product)
+        }
+      })
+
+      // 转换为建议格式
+      const suggestions = Array.from(uniqueProducts.values())
+          .map(item => ({
+            value: item.productName,
+            id: item.id // 保留ID用于后续操作
+          }))
+
       cb(suggestions)
     } else {
       cb([])
@@ -198,17 +211,25 @@ const fetchProducts = async () => {
     const res = await getAllProducts()
 
     if (res.code === '200' && Array.isArray(res.data)) {
-      products.value = res.data.map(item => ({
-        id: item.id,
-        productName: item.productName,
-        price: item.price,
-        rate: item.rate ?? 0,
-        cover: item.cover,
-        amount: item.amount,
-        frozen: item.frozen,
-      }))
-      filteredProducts.value = [...products.value]
-    } else {
+      // 去重逻辑：根据商品ID过滤
+      const uniqueProducts = res.data.reduce((acc, product) => {
+        if (!acc.some(p => p.id === product.id)) {
+          acc.push({
+            id: product.id,
+            productName: product.productName,
+            price: product.price,
+            rate: product.rate ?? 0,
+            cover: product.cover,
+            amount: product.amount,
+            frozen: product.frozen,
+          });
+        }
+        return acc;
+      }, [] as Product[]);
+
+      products.value = uniqueProducts;
+      filteredProducts.value = [...uniqueProducts];
+    }else {
       throw new Error('接口返回异常')
     }
   } catch (err: any) {

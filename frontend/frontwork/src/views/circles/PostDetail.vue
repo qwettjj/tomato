@@ -4,10 +4,7 @@
     <div v-if="post" class="post-detail">
       <h1 class="post-title">{{ post.title }}</h1>
       <div class="post-meta">
-        <span class="author">
-          <img :src="authorInfo?.avatar || 'default-avatar.png'" class="avatar" />
-          {{ authorInfo?.userName }}
-        </span>
+
         <span class="time">{{ formatTime(post.createTime) }}</span>
         <span class="stats">
           👁️ {{ post.viewCount }} 🤍 {{ post.likeCount }} 💬 {{ post.commentCount }}

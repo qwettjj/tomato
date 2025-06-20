@@ -88,6 +88,8 @@ const handleRegister = async () => {
     // 调用注册接口
     await userRegister(registerForm.value)
 
+    console.log(registerForm.value.avatar)
+
     ElMessage.success('注册成功')
     router.push('/login')
   } catch (error) {
@@ -102,6 +104,7 @@ const customRequest = async (options:any) => {
   formData.append('file',options.file);
   uploadImage(formData).then(res => {
     registerForm.value.avatar = res.data.data;
+    console.log(res.data.data);
   })
 }
 </script>

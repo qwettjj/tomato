@@ -39,15 +39,30 @@ const cancelModify = () => {
 }
 const fetchAllProducts = async () => {
   try {
-    const res = await getAllProducts()
-    console.log('API response:', res) // 调试用，可以查看完整响应结构
-    productList.value = res.data // 确保这里提取的是数组
-    console.log('Product list:', productList.value) // 检查提取后的数据
+    const res = await getAllProducts();
+    console.log('API response:', res); // 调试用
+
+    if (res.data && Array.isArray(res.data)) {
+      // 使用 reduce 去重，保留第一个出现的商品
+      const uniqueProducts = res.data.reduce((acc, product) => {
+        // 检查是否已存在相同 ID 的商品
+        const existingProduct = acc.find(p => p.id === product.id);
+        if (!existingProduct) {
+          acc.push(product); // 如果不存在，则添加
+        }
+        return acc;
+      }, []);
+
+      productList.value = uniqueProducts;
+      console.log('去重后的商品列表:', productList.value);
+    } else {
+      throw new Error('返回数据格式不正确');
+    }
   } catch (error) {
-    console.error('获取商品列表失败:', error)
-    ElMessage.error('获取商品列表失败')
+    console.error('获取商品列表失败:', error);
+    ElMessage.error('获取商品列表失败');
   }
-}
+};
 
 // 修改handleModifyClick函数
 const handleModifyClick = async () => {

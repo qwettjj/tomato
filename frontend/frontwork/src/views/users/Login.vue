@@ -57,6 +57,15 @@ const handleLogin = async () => {
       })
       password.value = ''
     }
+    else {
+      // 处理其他错误情况
+      ElMessage({
+        message: res.message || '登录失败，请检查用户名和密码',
+        type: 'error',
+        center: true,
+      });
+      password.value = '';
+    }
   })
 
 }
