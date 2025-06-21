@@ -54,5 +54,7 @@ public class TomatoMallException extends RuntimeException {
 
     public static TomatoMallException permissionDenied() { return new TomatoMallException("该用户无权访问");
     }
+
+    public static TomatoMallException insufficientStock(String s) {return new TomatoMallException(s);}
 }
 
