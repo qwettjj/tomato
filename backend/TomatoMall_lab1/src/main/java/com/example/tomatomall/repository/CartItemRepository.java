@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
     CartItem findCartItemByUserIdAndProductId(Integer UserId, Integer ProductId);
-    CartItem findCartItemByUserId(Integer UserId);
     List<CartItem> findCartItemsByUserId(Integer userId);
     @Modifying
     @Query("DELETE FROM CartItem c WHERE c.userId = :userId AND c.productId = :productId")

@@ -13,7 +13,7 @@ public interface HistoryRepository extends JpaRepository<History, Integer> {
 
     void deleteByOrderId(Integer orderId);
 
-    @Query("SELECT h FROM History h JOIN FETCH Order o " +
+    @Query("SELECT h FROM History h JOIN Order o ON h.orderId = o.orderId " +
             "WHERE h.userId = :userId AND o.status = :status")
     List<History> findValidHistories(@Param("userId") Integer userId,
                                      @Param("status") OrderStatuEnum status);
